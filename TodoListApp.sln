@@ -13,11 +13,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		user-stories.md = user-stories.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApi", "TodoListApp.WebApi\TodoListApp.WebApi.csproj", "{E24E0797-13A8-4635-9958-57CC7CA126A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApi.Models", "TodoListApp.WebApi.Models\TodoListApp.WebApi.Models.csproj", "{E2938F80-379F-4CE3-AFB6-7870A657610E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApp", "TodoListApp.WebApp\TodoListApp.WebApp.csproj", "{420F3B92-08A5-46A1-8955-CE1FC021B8D8}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71075FF6-34FF-4DFB-BBA7-7654CC357608}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E24E0797-13A8-4635-9958-57CC7CA126A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E24E0797-13A8-4635-9958-57CC7CA126A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E24E0797-13A8-4635-9958-57CC7CA126A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E24E0797-13A8-4635-9958-57CC7CA126A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2938F80-379F-4CE3-AFB6-7870A657610E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2938F80-379F-4CE3-AFB6-7870A657610E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2938F80-379F-4CE3-AFB6-7870A657610E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2938F80-379F-4CE3-AFB6-7870A657610E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{420F3B92-08A5-46A1-8955-CE1FC021B8D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{420F3B92-08A5-46A1-8955-CE1FC021B8D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{420F3B92-08A5-46A1-8955-CE1FC021B8D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{420F3B92-08A5-46A1-8955-CE1FC021B8D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 EndGlobal
