@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TodoListApp.WebApi.DataContext;
+using TodoListApp.WebApi.Data;
 
 #nullable disable
 
 namespace TodoListApp.WebApi.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    [Migration("20240607082642_AddRowVersionToTasks")]
-    partial class AddRowVersionToTasks
+    [Migration("20240607192218_InitialTodoListMigration")]
+    partial class InitialTodoListMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,6 +32,9 @@ namespace TodoListApp.WebApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -46,6 +49,9 @@ namespace TodoListApp.WebApi.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()

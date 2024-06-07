@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 public class TaskEntity
 {
@@ -11,6 +12,14 @@ public class TaskEntity
     public string Title { get; set; } = string.Empty;
 
     public string? Description { get; set; }
+
+    public int UserId { get; set; }
+
+    public TodoListApp.WebApi.Models.Identity.User User { get; set; }
+
+    public Status Status { get; set; } = Status.NotStarted;
+
+    public DateTime CreatedDate { get; set; }
 
     public DateTime? DueDate { get; set; }
 

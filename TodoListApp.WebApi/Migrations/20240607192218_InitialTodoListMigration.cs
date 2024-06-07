@@ -4,7 +4,7 @@ namespace TodoListApp.WebApi.Migrations
 {
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    public partial class SeedTodoListsAndTasks : Migration
+    public partial class InitialTodoListMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -1,9 +1,12 @@
-﻿namespace TodoListApp.WebApi.DataContext;
+﻿namespace TodoListApp.WebApi.Data;
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Identity;
 using TodoListApp.WebApi.Models.Tasks;
-
+using static TodoListApp.WebApi.Models.Identity.User;
 public class TodoListDbContext : DbContext
 {
     public TodoListDbContext(DbContextOptions<TodoListDbContext> options)
@@ -17,13 +20,13 @@ public class TodoListDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TodoListEntity>()
-            .HasMany<TaskEntity>(tl => tl.Tasks)
-            .WithOne(t => t.TodoList)
-            .HasForeignKey(t => t.TodoListId);
+        modelBuilder.Entity<TaskEntity>()
+            .HasOne(t => t.User)
+            .WithMany(u => u.AssignedTasks)
+            .HasForeignKey(t => t.UserId);
 
-        modelBuilder.Entity<TaskEntity>() // Add this if you haven't already
-            .HasOne<TodoListEntity>(t => t.TodoList)
+        modelBuilder.Entity<TaskEntity>()
+            .HasOne(t => t.TodoList)
             .WithMany(tl => tl.Tasks)
             .HasForeignKey(t => t.TodoListId);
     }

@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using TodoListApp.WebApi.DataContext;
+using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
 
