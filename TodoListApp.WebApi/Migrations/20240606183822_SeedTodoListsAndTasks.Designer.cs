@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TodoListApp.WebApi.DataContext;
 
@@ -11,9 +12,10 @@ using TodoListApp.WebApi.DataContext;
 namespace TodoListApp.WebApi.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    partial class TodoListDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240606183822_SeedTodoListsAndTasks")]
+    partial class SeedTodoListsAndTasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,12 +40,6 @@ namespace TodoListApp.WebApi.Migrations
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<string>("Title")
                         .IsRequired()

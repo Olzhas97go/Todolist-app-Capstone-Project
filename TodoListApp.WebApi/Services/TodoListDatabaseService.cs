@@ -1,5 +1,6 @@
 ﻿namespace TodoListApp.WebApi.Services;
 
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.DataContext;
 using TodoListApp.WebApi.Interfaces;
@@ -9,22 +10,27 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 {
     private readonly TodoListDbContext _context;
     private readonly ILogger<TodoListDatabaseService> _logger;
+    private readonly IMapper _mapper;
 
-    public TodoListDatabaseService(TodoListDbContext context, ILogger<TodoListDatabaseService> logger)
+    public TodoListDatabaseService(TodoListDbContext context, ILogger<TodoListDatabaseService> logger, IMapper mapper)
     {
         _context = context;
         _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<List<TodoListModel>> GetAllTodoListsAsync()
     {
-        return await _context.TodoLists
-            .Select(entity => new TodoListModel {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description, // Added Description mapping
-            })
-            .ToListAsync();
+        try
+        {
+            var entities = await _context.TodoLists.ToListAsync(); // Query the DbSet
+            return _mapper.Map<List<TodoListModel>>(entities);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving todo lists.");
+            throw new Exception("An error occurred while retrieving todo lists.", ex);
+        }
     }
 
     public async Task<TodoList> CreateTodoListAsync(TodoList newTodoList)
@@ -36,21 +42,25 @@ public class TodoListDatabaseService : ITodoListDatabaseService
                 throw new ArgumentException("Todo list name cannot be empty.");
             }
 
-            var todoListEntity = new TodoListEntity { Name = newTodoList.Name, Description = newTodoList.Description };
+            var todoListEntity = _mapper.Map<TodoListEntity>(newTodoList);
+
+            // Убедитесь, что идентификатор не установлен вручную
+            todoListEntity.Id = 0;
+
             _context.TodoLists.Add(todoListEntity);
             await _context.SaveChangesAsync();
 
-            return new TodoList { Id = todoListEntity.Id, Name = todoListEntity.Name, Description = todoListEntity.Description };
+            return _mapper.Map<TodoList>(todoListEntity);
         }
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Invalid input while creating a todo list.");
-            throw; // Re-throw the exception for the controller to handle
+            throw;
         }
         catch (DbUpdateException ex)
         {
             _logger.LogError(ex, "An error occurred while creating a todo list.");
-            throw new Exception("An error occurred while saving the data.", ex); // Wrap the exception for more context
+            throw new Exception("An error occurred while saving the data.", ex);
         }
     }
 

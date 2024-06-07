@@ -1,5 +1,7 @@
 ﻿namespace TodoListApp.WebApi.Models;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class TodoListModel
 {
     public int Id { get; set; }

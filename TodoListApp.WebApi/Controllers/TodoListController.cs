@@ -1,6 +1,6 @@
 ﻿namespace TodoListApp.WebApi.Controllers;
 
-
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Interfaces;
@@ -11,10 +11,12 @@ using TodoListApp.WebApi.Models;
 public class TodoListController : ControllerBase
 {
     private readonly ITodoListDatabaseService  _service;
+    private readonly IMapper _mapper;
 
-    public TodoListController(ITodoListDatabaseService  service)
+    public TodoListController(ITodoListDatabaseService  service, IMapper mapper)
     {
         _service = service;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -22,19 +24,13 @@ public class TodoListController : ControllerBase
     {
         try
         {
-            var todoListEntities = await _service.GetAllTodoListsAsync(); // Get entities
-            var todoListModels = todoListEntities.Select(entity => new TodoListModel
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description, // Added Description mapping
-            }).ToList(); // Map to TodoListModel
-
-            return Ok(todoListModels); // Return DTOs
+            var todoListEntities = await _service.GetAllTodoListsAsync();
+            var todoListModels = _mapper.Map<List<TodoListModel>>(todoListEntities);
+            return Ok(todoListModels);
         }
         catch (Exception ex)
         {
-            // Log the exception (using ILogger if available)
+            // Логирование исключения
             return StatusCode(500, "An error occurred while retrieving todo lists.");
         }
     }
@@ -44,9 +40,9 @@ public class TodoListController : ControllerBase
     {
         try
         {
-            var todoList = await this._service.CreateTodoListAsync(newTodoList);
-            // Corrected: Use the correct action name and route values
-            return CreatedAtAction(nameof(this.GetAllTodoLists), new { id = todoList.Id }, todoList);
+            var createdTodoList = await _service.CreateTodoListAsync(newTodoList); // Ensure newTodoList does not have an Id set
+            var todoListModel = _mapper.Map<TodoListModel>(createdTodoList);
+            return CreatedAtAction(nameof(GetAllTodoLists), new { id = todoListModel.Id }, todoListModel);
         }
         catch (ArgumentException ex)
         {
