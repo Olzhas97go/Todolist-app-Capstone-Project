@@ -12,8 +12,8 @@ using TodoListApp.WebApi.Data;
 namespace TodoListApp.WebApi.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    [Migration("20240607192218_InitialTodoListMigration")]
-    partial class InitialTodoListMigration
+    [Migration("20240612171608_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -36,6 +36,7 @@ namespace TodoListApp.WebApi.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DueDate")

@@ -21,7 +21,6 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<TodoListModel>>> GetAllTodoLists()
     {
         try

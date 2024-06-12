@@ -3,7 +3,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using TodoListApp.WebApi.DataContext;
+using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Services;
 using System.Text;

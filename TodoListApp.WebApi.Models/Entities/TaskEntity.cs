@@ -11,12 +11,7 @@ public class TaskEntity
     [Required]
     public string Title { get; set; } = string.Empty;
 
-    public string? Description { get; set; }
-
-    public int UserId { get; set; }
-
-    public TodoListApp.WebApi.Models.Identity.User User { get; set; }
-
+    public string Description { get; set; } = "No description";
     public Status Status { get; set; } = Status.NotStarted;
 
     public DateTime CreatedDate { get; set; }
