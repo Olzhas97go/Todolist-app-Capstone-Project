@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/todolist")]
@@ -20,6 +21,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<TodoListModel>>> GetAllTodoLists()
     {
         try
