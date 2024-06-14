@@ -11,4 +11,6 @@
         Task<bool> DeleteTodoListAsync(int id);
 
         Task<TodoList?> UpdateTodoListAsync(int id, TodoList updatedTodoList);
+
+        List<TodoListModel> GetTasksForUser(string userId);
     }

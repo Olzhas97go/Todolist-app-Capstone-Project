@@ -118,4 +118,17 @@ public class TodoListDatabaseService : ITodoListDatabaseService
             throw; // Let the controller handle the database error
         }
     }
+
+    public List<TodoListModel> GetTasksForUser(string userId)
+    {
+        return _context.Tasks
+            .Where(t => t.UserId == userId) // Filter by stored UserId
+            .Select(t => new TodoListModel
+            {
+                Id = t.Id,
+                Name = t.Title,
+                // ... other properties
+            })
+            .ToList();
+    }
 }

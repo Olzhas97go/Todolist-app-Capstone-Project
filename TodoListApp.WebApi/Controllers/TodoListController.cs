@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/todolist")]
@@ -102,5 +103,21 @@ public class TodoListController : ControllerBase
             // Log the exception
             return StatusCode(500, "An error occurred while updating the todo list.");
         }
+    }
+
+    [HttpGet("GetMyTodoLists")]
+    [Authorize] // Requires authentication
+    public IActionResult GetMyTodoLists()
+    {
+        // Get the user's ID from the token/claims
+        string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(); // Or handle the missing ID as needed
+        }
+
+        var tasks = _service.GetTasksForUser(userId);
+        return Ok(tasks);
     }
 }

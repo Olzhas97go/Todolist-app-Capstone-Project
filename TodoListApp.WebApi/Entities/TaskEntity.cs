@@ -1,9 +1,10 @@
-﻿
-namespace TodoListApp.WebApi.Models.Tasks;
+﻿namespace TodoListApp.WebApi.Models.Tasks;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using TodoListApp.WebApi.Models;
+
 public class TaskEntity
 {
     public int Id { get; set; }
@@ -29,4 +30,6 @@ public class TaskEntity
 
     [Timestamp]
     public byte[] RowVersion { get; set; } = null!;
+
+    public string UserId { get; set; } = string.Empty;
 }
