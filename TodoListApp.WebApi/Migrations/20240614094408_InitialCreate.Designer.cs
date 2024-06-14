@@ -12,7 +12,7 @@ using TodoListApp.WebApi.Data;
 namespace TodoListApp.WebApi.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    [Migration("20240612171608_InitialCreate")]
+    [Migration("20240614094408_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

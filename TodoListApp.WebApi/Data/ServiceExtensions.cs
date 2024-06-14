@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using TodoListApp.WebApi.Controllers;
-using TodoListApp.WebApi.Models;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 

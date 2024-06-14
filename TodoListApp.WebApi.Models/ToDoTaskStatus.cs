@@ -1,6 +1,6 @@
 ﻿namespace TodoListApp.WebApi.Models;
 
-public enum Status
+public enum ToDoTaskStatus
 {
     NotStarted = 1,
     InProgress = 2,

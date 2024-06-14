@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class TaskModel
 {
+    [Key]
     public int Id { get; set; }
 
     [Required]

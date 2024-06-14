@@ -1,9 +1,9 @@
-﻿namespace TodoListApp.WebApi.Models.Tasks;
+﻿
+namespace TodoListApp.WebApi.Models.Tasks;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
-
 public class TaskEntity
 {
     public int Id { get; set; }
@@ -12,7 +12,7 @@ public class TaskEntity
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = "No description";
-    public Status Status { get; set; } = Status.NotStarted;
+    public ToDoTaskStatus Status { get; set; } = ToDoTaskStatus.NotStarted;
 
     public DateTime CreatedDate { get; set; }
 
@@ -29,6 +29,4 @@ public class TaskEntity
 
     [Timestamp]
     public byte[] RowVersion { get; set; } = null!;
-    // Add a User property if you're implementing authentication
-    //public UserEntity? AssignedTo { get; set; }
 }
