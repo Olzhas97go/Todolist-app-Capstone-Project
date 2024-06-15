@@ -24,10 +24,20 @@ public static class ServiceExtensions
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                        .GetBytes(configuration.GetSection("AppSettings:Token").Value)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Keys:TokenSigningKey"])),
+                    ValidateIssuer = configuration.GetValue<bool>("Jwt:ValidateIssuer"),
+                    ValidateAudience = configuration.GetValue<bool>("Jwt:ValidateAudience")
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger<JwtBearerHandler>();
+                        logger.LogInformation("Received token from cookie: {Token}", context.Request.Cookies["jwtToken"]); // Log the received token
+                        context.Token = context.Request.Cookies["jwtToken"];
+                        return Task.CompletedTask;
+                    },
                 };
             });
     }

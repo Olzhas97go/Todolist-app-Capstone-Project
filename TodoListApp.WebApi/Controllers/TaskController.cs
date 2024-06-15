@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Tasks;
+using System.Security.Claims;
+using TodoListApp.WebApi.Models;
 
 [ApiController]
 [Route("api/task")]
@@ -29,17 +31,33 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost("{todoListId}/tasks")] // POST /api/tasks/{todoListId}/tasks
+    [Authorize]
     public async Task<ActionResult<TaskModel>> AddTask(int todoListId, [FromBody] TaskModel newTask)
     {
         try
         {
-            // Basic input validation
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var createdTask = await _taskService.AddTaskAsync(todoListId, newTask);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Invalid token: Missing User ID claim.");
+            }
+
+            var taskEntity = new TaskEntity
+            {
+                Title = newTask.Title,
+                Description = newTask.Description,
+                TodoListId = todoListId,
+                CreatedDate = DateTime.Now,
+                Status = ToDoTaskStatus.NotStarted, // Assuming you have an enum for task status
+                UserId = userIdClaim.Value // Set the UserId on the entity
+            };
+
+            var createdTask = await _taskService.AddTaskAsync(taskEntity); // Pass the entity to your service
 
             if (createdTask == null)
             {
@@ -56,6 +74,7 @@ public class TaskController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
+
 
     [HttpGet("{taskId}")]  // GET /api/tasks/{taskId}
     public async Task<ActionResult<TaskModel>> GetTaskById(int taskId)

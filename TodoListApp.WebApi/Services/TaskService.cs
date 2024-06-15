@@ -1,4 +1,5 @@
-﻿namespace TodoListApp.WebApi.Services;
+﻿
+namespace TodoListApp.WebApi.Services;
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Tasks;
+using TodoListApp.WebApi.Models;
 
 public class TaskService : ITaskService
 {
@@ -67,40 +69,36 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<TaskModel> AddTaskAsync(int todoListId, TaskModel newTask)
+    public async Task<TaskModel> AddTaskAsync(TaskEntity taskEntity)
     {
-        try
-        {
-            // 1. Check if the TodoList exists
-            var todoList = await _context.TodoLists.FindAsync(todoListId);
-            if (todoList == null)
-            {
-                throw new ArgumentException($"Todo list with ID {todoListId} not found.");
-            }
+        // 1. Validate TodoListId:
+        var todoListExists = await _context.TodoLists.AnyAsync(tl => tl.Id == taskEntity.TodoListId);
 
-            // 2. Map the TaskModel to TaskEntity
-            var taskEntity = _mapper.Map<TaskEntity>(newTask);
-            taskEntity.TodoListId = todoListId;
-            taskEntity.TodoList = todoList; // Optionally, explicitly set the navigation property
-
-            // 3. Add to the database and save changes
-            _context.Tasks.Add(taskEntity);
-            await _context.SaveChangesAsync();
-
-            // 4. Map the newly created TaskEntity back to TaskModel and return
-            return _mapper.Map<TaskModel>(taskEntity);
-        }
-        catch (ArgumentException ex)
+        if (!todoListExists)
         {
-            _logger.LogError(ex, "Invalid input while creating a task.");
-            throw; // Rethrow the ArgumentException to be handled by the controller.
+            throw new ArgumentException($"Todo list with ID {taskEntity.TodoListId} not found.");
         }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(ex, "An error occurred while saving the task to the database.");
-            throw new Exception("An error occurred while saving the task.", ex); // Throw a more general exception with a custom message.
-        }
+
+        // 2. Other Validations (Optional):
+        // - You might have additional validation rules for your task, such as:
+        //   - Required fields (e.g., Title)
+        //   - Maximum length constraints
+        //   - Custom business logic
+
+        // 3. Set Additional Properties (if needed):
+        taskEntity.CreatedDate = DateTime.UtcNow; // Set the current UTC time
+
+        // 4. Add to Database:
+        _context.Tasks.Add(taskEntity);
+        await _context.SaveChangesAsync();
+
+        // 5. Logging (Optional):
+        _logger.LogInformation("Created task with ID {TaskId} for user {UserId}", taskEntity.Id, taskEntity.UserId);
+
+        // 6. Return Result:
+        return _mapper.Map<TaskModel>(taskEntity); // Map back to TaskModel using AutoMapper
     }
+
 
     public async Task<bool> DeleteTaskAsync(int taskId)
     {

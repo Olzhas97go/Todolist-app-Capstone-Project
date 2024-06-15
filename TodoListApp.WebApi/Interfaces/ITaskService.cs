@@ -8,7 +8,7 @@ public interface ITaskService
 
     Task<TaskModel> GetTaskByIdAsync(int taskId);                   // US06
 
-    Task<TaskModel> AddTaskAsync(int todoListId, TaskModel newTask); // US07
+    Task<TaskModel> AddTaskAsync(TaskEntity taskEntity); // US07
 
     Task<bool> DeleteTaskAsync(int taskId);                         // US08
 

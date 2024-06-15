@@ -17,28 +17,9 @@ public class TodoListWebApiService
         _baseUrl = configuration["TodoListApi:BaseUrl"];
         _httpContextAccessor = httpContextAccessor;
     }
-
     public async Task<List<TodoListModel>> GetTasksForUserAsync()
     {
-            var httpContext = _httpContextAccessor.HttpContext; // No need to re-assign
-
-        // Check if the user is authenticated
-        if (httpContext == null || !httpContext.User.Identity.IsAuthenticated)
-        {
-            throw new Exception("User not authenticated");
-        }
-
-        // Get the user ID from the claims
-        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (userId == null)
-        {
-            // Handle the case where the user ID claim is missing
-            throw new Exception("User ID claim not found.");
-        }
-
-        _httpClient.DefaultRequestHeaders.Add("UserId", userId);
-
+        // No need to manually add the token; the cookie middleware will handle it.
         string apiUrl = $"{_baseUrl}/api/TodoList/GetMyTodoLists";
         return await _httpClient.GetFromJsonAsync<List<TodoListModel>>(apiUrl);
     }

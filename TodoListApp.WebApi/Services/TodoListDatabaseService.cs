@@ -123,12 +123,7 @@ public class TodoListDatabaseService : ITodoListDatabaseService
     {
         return _context.Tasks
             .Where(t => t.UserId == userId) // Filter by stored UserId
-            .Select(t => new TodoListModel
-            {
-                Id = t.Id,
-                Name = t.Title,
-                // ... other properties
-            })
+            .Select(t => new TodoListModel { Id = t.Id, Name = t.Title, UserId=t.UserId })
             .ToList();
     }
 }

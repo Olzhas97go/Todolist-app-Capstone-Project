@@ -106,22 +106,17 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet("GetMyTodoLists")]
-    [Authorize] // Requires authentication
+    [Authorize]
     public IActionResult GetMyTodoLists()
     {
-        // Get the user's ID from the token/claims
-        string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
         {
-            return Unauthorized(); // Or handle the missing ID as needed
+            return Unauthorized("Invalid token: Missing User ID claim.");
         }
 
+        string userId = userIdClaim.Value;
         var tasks = _service.GetTasksForUser(userId);
-
-        var logger = HttpContext.RequestServices.GetService<ILogger<TodoListController>>();
-        logger.LogInformation("Request Headers: {Headers}", Request.Headers);
-        logger.LogInformation("User ID extracted from claim: {UserId}", userId);
         return Ok(tasks);
     }
 }
