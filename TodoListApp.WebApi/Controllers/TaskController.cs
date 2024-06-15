@@ -1,4 +1,5 @@
 ﻿namespace TodoListApp.WebApi.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -123,5 +124,12 @@ public class TaskController : ControllerBase
             _logger.LogError(ex, "An error occurred while deleting task with ID {taskId}.", taskId);
             return StatusCode(500, "Internal server error");
         }
+    }
+
+    [HttpGet("TestAuth")]
+    [Authorize]
+    public IActionResult TestAuth()
+    {
+        return Ok("Authenticated!");
     }
 }

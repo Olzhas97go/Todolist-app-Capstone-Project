@@ -118,6 +118,10 @@ public class TodoListController : ControllerBase
         }
 
         var tasks = _service.GetTasksForUser(userId);
+
+        var logger = HttpContext.RequestServices.GetService<ILogger<TodoListController>>();
+        logger.LogInformation("Request Headers: {Headers}", Request.Headers);
+        logger.LogInformation("User ID extracted from claim: {UserId}", userId);
         return Ok(tasks);
     }
 }
