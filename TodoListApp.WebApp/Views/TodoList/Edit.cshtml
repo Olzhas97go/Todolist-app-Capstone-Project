@@ -1,0 +1,50 @@
+﻿@* Edit.cshtml *@
+@model TodoListWebApiModel
+
+<h2>Edit To-Do List</h2>
+
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id">
+    <input type="hidden" name="_method" value="PUT" />
+    <div>
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tasks" class="control-label"></label>
+        <ul id="taskList">
+            @for (int i = 0; i < Model.Tasks.Count; i++)
+            {
+            <li>
+                <input asp-for="Tasks[i].Description" class="form-control" />
+                <span asp-validation-for="Tasks[i].Description" class="text-danger"></span>
+            </li>
+            }
+        </ul>
+        <button type="button" id="addTaskButton" class="btn btn-secondary">Add Task</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+
+<script>
+    document.getElementById("addTaskButton").addEventListener("click", function() {
+        const taskList = document.getElementById("taskList");
+        const newIndex = taskList.children.length - 1;
+
+        const newListItem = document.createElement("li");
+        newListItem.innerHTML = `
+            <input type="text" class="form-control" name="Tasks[${newIndex}]" value="" />
+            <span class="text-danger field-validation-valid" data-valmsg-for="Tasks[${newIndex}]" data-valmsg-replace="true"></span>
+        `;
+
+        taskList.insertBefore(newListItem, taskList.lastElementChild);
+    });
+</script>

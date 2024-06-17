@@ -1,4 +1,4 @@
-﻿namespace TodoListApp.WebApi.Models;
+﻿namespace TodoListApp.WebApp.Models;
 
 public class TodoList
 {

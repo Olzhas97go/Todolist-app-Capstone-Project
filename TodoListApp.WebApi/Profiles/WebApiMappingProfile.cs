@@ -1,14 +1,14 @@
-﻿namespace TodoListApp.WebApi.Services;
+﻿namespace TodoListApp.WebApi.Profiles;
 
 using AutoMapper;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Tasks;
 
-public class MappingProfile : Profile
+public class WebApiMappingProfile : Profile
 {
-    public MappingProfile()
+    public WebApiMappingProfile()
     {
-        CreateMap<TodoList, TodoListEntity>()
+        CreateMap<TodoListDto, TodoListEntity>()
             .ForMember(dest => dest.Tasks, opt => opt.Ignore()).ReverseMap();
 
         CreateMap<TodoListEntity, TodoListModel>();
@@ -16,7 +16,7 @@ public class MappingProfile : Profile
         CreateMap<TodoListModel, TodoListEntity>()
             .ForMember(dest => dest.Tasks, opt => opt.Ignore());
 
-        CreateMap<TodoList, TodoListModel>().ReverseMap();
+        CreateMap<TodoListDto, TodoListModel>().ReverseMap();
 
         CreateMap<TaskEntity, TaskModel>()
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.DueDate < DateTime.Now)).ReverseMap();

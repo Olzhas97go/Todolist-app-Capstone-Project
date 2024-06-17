@@ -18,9 +18,11 @@ public class TodoListController : ControllerBase
     private readonly ITodoListDatabaseService  _service;
     private readonly IMapper _mapper;
     private readonly TodoListDbContext _context;
+    private readonly ILogger<TodoListController> _logger;
 
-    public TodoListController(ITodoListDatabaseService  service, IMapper mapper, TodoListDbContext context)
+    public TodoListController(ITodoListDatabaseService  service, IMapper mapper, TodoListDbContext context, ILogger<TodoListController> logger)
     {
+        _logger = logger;
         _context = context;
         _service = service;
         _mapper = mapper;
@@ -43,24 +45,37 @@ public class TodoListController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TodoList>> CreateTodoList([FromBody] TodoList newTodoList)
+    public async Task<ActionResult<TodoListDto>> CreateTodoList([FromBody] TodoListDto todoListDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState); // Return model validation errors
+        }
+
         try
         {
-            var createdTodoList = await _service.CreateTodoListAsync(newTodoList); // Ensure newTodoList does not have an Id set
-            var todoListModel = _mapper.Map<TodoListModel>(createdTodoList);
-            return CreatedAtAction(nameof(GetAllTodoLists), new { id = todoListModel.Id }, todoListModel);
+            _logger.LogInformation("Received request to create todo list: {@todoListDto}", todoListDto);
+
+            var createdTodoList = await _service.CreateTodoListAsync(todoListDto);
+
+            _logger.LogInformation("Returning response with status code 201 (Created): {createdTodoList}", createdTodoList);
+
+            return CreatedAtAction(nameof(GetAllTodoLists), new { id = createdTodoList.Id }, createdTodoList); // Return createdTodoList directly
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(ex.Message); // 400 Bad Request
+            _logger.LogError(ex, "Invalid argument when creating todo list: {ErrorMessage}", ex.Message);
+            return BadRequest(new { Error = ex.Message });
         }
         catch (DbUpdateException ex)
         {
-            // Log the exception (using ILogger if available)
-            return StatusCode(500, "An error occurred while creating the todo list."); // 500 Internal Server Error
+            _logger.LogError(ex, "Database error while creating todo list");
+            return StatusCode(500, new { Error = "An error occurred while creating the todo list." });
         }
     }
+
+
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTodoList(int id)
@@ -77,21 +92,22 @@ public class TodoListController : ControllerBase
         catch (Exception ex)
         {
             // Log the exception
-            return StatusCode(500, "An error occurred while deleting the todo list.");
+            return StatusCode(500, new { Error = "An error occurred while deleting the todo list." });
         }
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTodoList(int id, [FromBody] TodoList updatedTodoList)
+    public async Task<IActionResult> UpdateTodoList(int id, [FromBody] TodoListDto todoListDto)
     {
-        if (id != updatedTodoList.Id)
+        if (id != todoListDto.Id)
         {
             return BadRequest("The id in the URL does not match the id in the request body."); // Ensure IDs match
         }
 
         try
         {
-            var todoList = await this._service.UpdateTodoListAsync(id, updatedTodoList);
+            var todoListEntity = _mapper.Map<TodoListEntity>(todoListDto);
+            var todoList = await _service.UpdateTodoListAsync(id, todoListEntity); // Pass both id and entity
             if (todoList == null)
             {
                 return NotFound(); // Not found
@@ -100,8 +116,14 @@ public class TodoListController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            // You could try to handle the concurrency conflict here or simply return an error
-            return Conflict(); // 409 Conflict
+            if (!await _service.TodoListExists(id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
         }
         catch (Exception ex)
         {
@@ -109,6 +131,9 @@ public class TodoListController : ControllerBase
             return StatusCode(500, "An error occurred while updating the todo list.");
         }
     }
+
+
+
 
     [HttpGet("GetMyTodoLists")]
     [Authorize]
@@ -124,4 +149,26 @@ public class TodoListController : ControllerBase
         var tasks = _service.GetTasksForUser(userId, status, sortBy, sortOrder); // Pass sortBy and sortOrder
         return Ok(tasks);
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<TodoListDto>> GetTodoListById(int id)
+    {
+        try
+        {
+            var todoListEntity = await _service.GetTodoListByIdAsync(id);
+            if (todoListEntity == null)
+            {
+                return NotFound();
+            }
+
+            var todoListDto = _mapper.Map<TodoListDto>(todoListEntity);
+            return Ok(todoListDto);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            return StatusCode(500, new { Error = "An error occurred while retrieving the todo list." });
+        }
+    }
+
 }

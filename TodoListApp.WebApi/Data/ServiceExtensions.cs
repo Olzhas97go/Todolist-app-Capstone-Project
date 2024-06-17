@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Identity;
 using TodoListApp.WebApi.Controllers;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using TodoListApp.WebApi.Profiles;
+
 
 public static class ServiceExtensions
 {
@@ -75,6 +77,6 @@ public static class ServiceExtensions
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(MappingProfile));
+        services.AddAutoMapper(typeof(WebApiMappingProfile).Assembly);
     }
 }

@@ -1,3 +1,6 @@
-﻿@using TodoListApp.WebApp
+﻿@using Microsoft.AspNetCore.Identity
+@using TodoListApp.WebApp
+@using TodoListApp.WebApp.Areas.Identity.Data
 @using TodoListApp.WebApp.Models
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject SignInManager<ApplicationUser> SignInManager

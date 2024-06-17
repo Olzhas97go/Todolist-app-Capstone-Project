@@ -15,5 +15,5 @@ public class TodoListEntity
     [MaxLength(500)]
     public string? Description { get; set; }
 
-    public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
+    public List<TaskEntity> Tasks { get; set; } = new();
 }

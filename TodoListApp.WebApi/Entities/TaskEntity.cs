@@ -22,7 +22,7 @@ public class TaskEntity
     public bool IsCompleted { get; set; }
 
     // Relationship with TodoListEntity
-    [ForeignKey("TodoList")]
+    [ForeignKey("TodoListDto")]
     public int TodoListId { get; set; }
 
     [ForeignKey("TodoListId")]

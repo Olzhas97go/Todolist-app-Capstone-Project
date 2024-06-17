@@ -19,6 +19,11 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         _mapper = mapper;
     }
 
+    public async Task<bool> TodoListExists(int id)
+    {
+        return await _context.TodoLists.AnyAsync(e => e.Id == id);
+    }
+
     public async Task<List<TodoListModel>> GetAllTodoListsAsync()
     {
         try
@@ -33,16 +38,16 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         }
     }
 
-    public async Task<TodoList> CreateTodoListAsync(TodoList newTodoList)
+    public async Task<TodoListDto> CreateTodoListAsync(TodoListDto newTodoListDto)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(newTodoList.Name))
+            if (string.IsNullOrWhiteSpace(newTodoListDto.Name))
             {
                 throw new ArgumentException("Todo list name cannot be empty.");
             }
 
-            var todoListEntity = _mapper.Map<TodoListEntity>(newTodoList);
+            var todoListEntity = _mapper.Map<TodoListEntity>(newTodoListDto);
 
             // Убедитесь, что идентификатор не установлен вручную
             todoListEntity.Id = 0;
@@ -50,7 +55,7 @@ public class TodoListDatabaseService : ITodoListDatabaseService
             _context.TodoLists.Add(todoListEntity);
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<TodoList>(todoListEntity);
+            return _mapper.Map<TodoListDto>(todoListEntity);
         }
         catch (ArgumentException ex)
         {
@@ -85,39 +90,33 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         }
     }
 
-    public async Task<TodoList?> UpdateTodoListAsync(int id, TodoList updatedTodoList)
+    public async Task<TodoListEntity> UpdateTodoListAsync(int id, TodoListEntity todoList)
     {
+        var existingTodoList = await _context.TodoLists.FindAsync(id);
+        if (existingTodoList == null)
+        {
+            return null;
+        }
+
+        existingTodoList.Name = todoList.Name; // Update reference
+        existingTodoList.Description = todoList.Description; // Update reference
+
+
+        // ... (update other properties as needed)
+
         try
         {
-            var existingTodoList = await _context.TodoLists.FindAsync(id);
-            if (existingTodoList == null)
-            {
-                return null; // Not found
-            }
-
-            existingTodoList.Name = updatedTodoList.Name;
-            existingTodoList.Description = updatedTodoList.Description;
-
             await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Handle concurrency exception here if needed
+            throw;
+        }
 
-            return new TodoList
-            {
-                Id = existingTodoList.Id,
-                Name = existingTodoList.Name,
-                Description = existingTodoList.Description
-            };
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            _logger?.LogError(ex, "Concurrency error updating TodoList with ID {Id}", id);
-            throw; // Let the controller handle the concurrency conflict
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger?.LogError(ex, "Error updating TodoList with ID {Id}", id);
-            throw; // Let the controller handle the database error
-        }
+        return existingTodoList;
     }
+
 
     public List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")
     {
@@ -146,5 +145,10 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         return query
             .Select(t => new TodoListModel { Id = t.Id, Name = t.Title, Description = t.Description, Status = t.Status })
             .ToList();
+    }
+
+    public async Task<TodoListEntity> GetTodoListByIdAsync(int id)
+    {
+        return await _context.TodoLists.FindAsync(id);
     }
 }

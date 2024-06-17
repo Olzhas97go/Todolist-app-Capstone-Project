@@ -22,20 +22,20 @@ Here are some hints for you:
 
 | Epic | User Story | Description                                                                     | Priority | Is completed? |
 |------|------------|---------------------------------------------------------------------------------|----------|---------------|
-| EP01 | US01       | View the list of my to-do lists.                                                | 1        | yes           |
-| EP01 | US02       | Add a new to-do list.                                                           | 1        | yes           |
-| EP01 | US03       | Delete a to-do list.                                                            | 1        | yes           |
-| EP01 | US04       | Edit a to-do list.                                                              | 1        | yes           |
-| EP02 | US05       | View the list of tasks in a to-do list.                                         | 1        | yes           |
-| EP02 | US06       | View the task details page.                                                     | 1        | yes           |
-| EP02 | US07       | Add a new to-do task.                                                           | 1        | yes           |
-| EP02 | US08       | Delete a to-do task.                                                            | 1        | yes           |
-| EP02 | US09       | Edit a to-do task.                                                              | 1        | yes           |
-| EP02 | US10       | Highlight tasks that are overdue.                                               | 1        | yes           |
-| EP03 | US11       | View a list of tasks assigned to me.                                            | 2        |               |
-| EP03 | US12       | Filter tasks in my assigned task list.                                          | 2        |               |
-| EP03 | US13       | Sort tasks in my assigned task list.                                            | 2        |               |
-| EP03 | US14       | Change the status of a task from the list of assigned tasks.                    | 2        |               |
+| EP01 | US01       | View the list of my to-do lists.                                                | 1        | + backend     |
+| EP01 | US02       | Add a new to-do list.                                                           | 1        | + backend   |
+| EP01 | US03       | Delete a to-do list.                                                            | 1        | + backend   |
+| EP01 | US04       | Edit a to-do list.                                                              | 1        | + backend   |
+| EP02 | US05       | View the list of tasks in a to-do list.                                         | 1        | + backend   |
+| EP02 | US06       | View the task details page.                                                     | 1        | + backend   |
+| EP02 | US07       | Add a new to-do task.                                                           | 1        | + backend   |
+| EP02 | US08       | Delete a to-do task.                                                            | 1        | + backend   |
+| EP02 | US09       | Edit a to-do task.                                                              | 1        | + backend   |
+| EP02 | US10       | Highlight tasks that are overdue.                                               | 1        | + backend   |
+| EP03 | US11       | View a list of tasks assigned to me.                                            | 2        | + backend   |
+| EP03 | US12       | Filter tasks in my assigned task list.                                          | 2        | + backend   |
+| EP03 | US13       | Sort tasks in my assigned task list.                                            | 2        | + backend   |
+| EP03 | US14       | Change the status of a task from the list of assigned tasks.                    | 2        | + backend   |
 | EP04 | US15       | Search for tasks with specified text in the task title.                         | 3        |               |
 | EP04 | US16       | Highlight tasks that are overdue on the search result page.                     | 3        |               |
 | EP05 | US17       | View a list of tags on the task details page.                                   | 5        |               |

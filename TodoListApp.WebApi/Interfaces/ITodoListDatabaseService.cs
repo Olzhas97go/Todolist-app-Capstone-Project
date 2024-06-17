@@ -6,11 +6,15 @@
     {
         Task<List<TodoListModel>> GetAllTodoListsAsync();
 
-        Task<TodoList> CreateTodoListAsync(TodoList newTodoList);
+        Task<TodoListDto> CreateTodoListAsync(TodoListDto newTodoListDto);
 
         Task<bool> DeleteTodoListAsync(int id);
 
-        Task<TodoList?> UpdateTodoListAsync(int id, TodoList updatedTodoList);
+        Task<TodoListEntity> UpdateTodoListAsync(int id, TodoListEntity todoList);
 
         List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc");
+
+        Task<TodoListEntity> GetTodoListByIdAsync(int id);
+
+        Task<bool> TodoListExists(int id);
     }
