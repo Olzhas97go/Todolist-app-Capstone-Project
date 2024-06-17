@@ -8,6 +8,7 @@ using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Tasks;
 using System.Security.Claims;
 using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Data;
 
 [ApiController]
 [Route("api/task")]
@@ -15,11 +16,15 @@ public class TaskController : ControllerBase
 {
     private readonly ITaskService _taskService;
     private readonly ILogger<TaskController> _logger;
+    private readonly IMapper _mapper;
+    private readonly TodoListDbContext _context;
 
-    public TaskController(ITaskService taskService, ILogger<TaskController> logger)
+    public TaskController(ITaskService taskService, ILogger<TaskController> logger, IMapper mapper, TodoListDbContext context)
     {
         _taskService = taskService;
         _logger = logger;
+        _mapper = mapper;
+        _context = context;
     }
 
 
@@ -145,10 +150,17 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpGet("TestAuth")]
+    [HttpPut("{todoListId}/{taskId}/status")] // PUT /api/Task/{todoListId}/{taskId}/status
     [Authorize]
-    public IActionResult TestAuth()
+    public async Task<IActionResult> UpdateTaskStatus(int todoListId, int taskId, ToDoTaskStatus newStatus)
     {
-        return Ok("Authenticated!");
+        var updatedTask = await _taskService.UpdateTaskStatusAsync(todoListId, taskId, newStatus);
+
+        if (updatedTask == null)
+        {
+            return NotFound("Task not found.");
+        }
+
+        return Ok(updatedTask);
     }
 }

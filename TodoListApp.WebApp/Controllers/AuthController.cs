@@ -19,20 +19,20 @@ namespace TodoListApp.WebApp.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class AuthController : Controller
     {
         private readonly WebAppContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _config;
-        private readonly ILogger<ValuesController> _logger;
+        private readonly ILogger<AuthController> _logger;
 
-        public ValuesController(
+        public AuthController(
             WebAppContext dbContext,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration config,
-            ILogger<ValuesController> logger)
+            ILogger<AuthController> logger)
         {
             _logger = logger;
             _dbContext = dbContext;

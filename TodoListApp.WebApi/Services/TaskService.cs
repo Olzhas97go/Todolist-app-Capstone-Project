@@ -169,4 +169,24 @@ public class TaskService : ITaskService
             throw new Exception("An error occurred while updating the task.", ex); // Throw a more general exception with a custom message.
         }
     }
+
+    public async Task<TaskModel> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus)
+    {
+        // 1. Get the user ID from the token claims (same as in your TodoListController)
+
+        // 2. Retrieve the task from the database
+        var taskEntity = await _context.Tasks
+            .Where(t => t.TodoListId == todoListId && t.Id == taskId)
+            .FirstOrDefaultAsync();
+
+        // 3. Authorization check: Verify if the user owns the task
+        // ... (same as before)
+
+        // 4. Update the task status and save changes
+        taskEntity.Status = newStatus;
+        await _context.SaveChangesAsync();
+
+        // 5. Return the updated task (optional)
+        return _mapper.Map<TaskModel>(taskEntity);
+    }
 }

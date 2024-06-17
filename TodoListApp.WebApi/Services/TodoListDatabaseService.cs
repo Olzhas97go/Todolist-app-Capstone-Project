@@ -119,11 +119,32 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         }
     }
 
-    public List<TodoListModel> GetTasksForUser(string userId)
+    public List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")
     {
-        return _context.Tasks
-            .Where(t => t.UserId == userId) // Filter by stored UserId
-            .Select(t => new TodoListModel { Id = t.Id, Name = t.Title, UserId=t.UserId })
+        var query = _context.Tasks.Where(t => t.UserId == userId);
+
+        if (status.HasValue)
+        {
+            query = query.Where(t => t.Status == status);
+        }
+
+        // Apply sorting
+        switch (sortBy.ToLower())
+        {
+            case "name":
+                query = sortOrder == "desc" ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title);
+                break;
+            case "duedate":
+                query = sortOrder == "desc" ? query.OrderByDescending(t => t.DueDate) : query.OrderBy(t => t.DueDate);
+                break;
+            default:
+                // Default sorting (by Name ascending) or throw an exception for invalid input
+                query = query.OrderBy(t => t.Title);
+                break;
+        }
+
+        return query
+            .Select(t => new TodoListModel { Id = t.Id, Name = t.Title, Description = t.Description, Status = t.Status })
             .ToList();
     }
 }

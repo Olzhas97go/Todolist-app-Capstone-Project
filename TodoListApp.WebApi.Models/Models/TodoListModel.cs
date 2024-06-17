@@ -12,4 +12,5 @@ public class TodoListModel
     [Range(1, 120)]
     public string? Description { get; set; }
     public string UserId { get; set; } = string.Empty;
+    public ToDoTaskStatus Status { get; set; }
 }

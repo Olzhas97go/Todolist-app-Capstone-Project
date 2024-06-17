@@ -7,6 +7,9 @@ using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Models.Tasks;
+
 
 [ApiController]
 [Route("api/todolist")]
@@ -14,9 +17,11 @@ public class TodoListController : ControllerBase
 {
     private readonly ITodoListDatabaseService  _service;
     private readonly IMapper _mapper;
+    private readonly TodoListDbContext _context;
 
-    public TodoListController(ITodoListDatabaseService  service, IMapper mapper)
+    public TodoListController(ITodoListDatabaseService  service, IMapper mapper, TodoListDbContext context)
     {
+        _context = context;
         _service = service;
         _mapper = mapper;
     }
@@ -107,7 +112,7 @@ public class TodoListController : ControllerBase
 
     [HttpGet("GetMyTodoLists")]
     [Authorize]
-    public IActionResult GetMyTodoLists()
+    public IActionResult GetMyTodoLists([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
@@ -116,7 +121,7 @@ public class TodoListController : ControllerBase
         }
 
         string userId = userIdClaim.Value;
-        var tasks = _service.GetTasksForUser(userId);
+        var tasks = _service.GetTasksForUser(userId, status, sortBy, sortOrder); // Pass sortBy and sortOrder
         return Ok(tasks);
     }
 }
