@@ -151,7 +151,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TodoListDto>> GetTodoListById(int id)
+    public async Task<ActionResult> GetTodoListById(int id)
     {
         try
         {
@@ -170,5 +170,4 @@ public class TodoListController : ControllerBase
             return StatusCode(500, new { Error = "An error occurred while retrieving the todo list." });
         }
     }
-
 }

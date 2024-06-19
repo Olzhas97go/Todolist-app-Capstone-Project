@@ -1,0 +1,19 @@
+﻿@model TodoListApp.WebApp.Models.TaskDetailsViewModel
+
+<h2>Task Details</h2>
+
+@if (Model.Task != null)
+{
+    <div>
+        <h3>@Model.Task.Description</h3>
+        <p>Created on: @Model.Task.CreatedAt.ToShortDateString()</p>
+        @if (Model.Task.Completed)
+        {
+            <p>Completed on: @Model.Task.CompletedAt?.ToShortDateString()</p>
+        }
+    </div>
+}
+else
+{
+    <p>Task not found.</p>
+}

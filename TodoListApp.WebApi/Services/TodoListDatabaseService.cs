@@ -149,6 +149,8 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 
     public async Task<TodoListEntity> GetTodoListByIdAsync(int id)
     {
-        return await _context.TodoLists.FindAsync(id);
+        return await _context.TodoLists
+            .Include(t => t.Tasks) // Include tasks
+            .FirstOrDefaultAsync(t => t.Id == id);
     }
 }

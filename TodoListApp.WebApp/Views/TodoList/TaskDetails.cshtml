@@ -1,0 +1,14 @@
+﻿@model TaskDetailsViewModel
+
+<h2>Task Details</h2>
+
+<div>
+    <h3>@Model.Task.Description</h3>
+    <p>Created on: @Model.Task.CreatedAt</p>
+    @if (Model.Task.Completed)
+    {
+    <p>Completed on: @Model.Task.CompletedAt</p>
+    }
+</div>
+
+<a asp-action="EditTask" asp-route-id="@Model.Task.Id">Edit Task</a>

@@ -175,4 +175,50 @@ public class TodoListController : Controller
             return View(model);
         }
     }
+
+    [HttpGet("Details/{id}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        try
+        {
+            var todoListDto = await _todoListApi.GetTodoListById(id);
+
+            if (todoListDto == null)
+            {
+                return NotFound();
+            }
+
+            if (todoListDto.Tasks == null || !todoListDto.Tasks.Any())
+            {
+                return View("NoTasks");
+            }
+
+            var task = todoListDto.Tasks.FirstOrDefault(t => t.Id == id); // Use 'id' instead of 'taskId'
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new TaskDetailsViewModel
+            {
+                Task = new TodoListApp.WebApp.Models.Task
+                {
+                    Id = task.Id,
+                    Description = task.Description,
+                    CreatedAt = task.CreatedAt,
+                    CompletedAt = task.CreatedAt,
+                    Completed = task.IsCompleted
+                }
+            };
+            return View(viewModel);
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, "API error while fetching todo list.");
+
+            // Consider creating a more specific error view or handling differently
+            return View("ApiError", new ApiErrorViewModel { Message = "An error occurred while fetching the task details." });
+        }
+    }
 }

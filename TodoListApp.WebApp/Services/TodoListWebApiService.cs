@@ -54,12 +54,14 @@ public class TodoListWebApiService : ITodoListWebApiService
     }
 
 
-    public async Task UpdateTaskStatusAsync(int taskId, ToDoTaskStatus newStatus)
+    public async Task<bool> UpdateTaskStatusAsync(int taskId, ToDoTaskStatus newStatus)
     {
-        var apiUrl = $"{_apiSettings.TodoListApiBaseUrl}/api/TodoListDto/tasks/{taskId}/status";
+        var apiUrl = $"api/todo/tasks/{taskId}/status";
 
         var content = JsonContent.Create(new { Status = newStatus });
         var response = await _httpClient.PutAsync(apiUrl, content);
-        response.EnsureSuccessStatusCode();
+
+        response.EnsureSuccessStatusCode(); // Throw an exception if the request failed
+        return response.IsSuccessStatusCode;
     }
 }

@@ -36,8 +36,8 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
         {
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
             var user = userManager.GetUserAsync(context.HttpContext.User);
-            if (user == null) context.Fail("Unauthorized");
-            return Task.CompletedTask;
+            if (user == null) context.Fail(failureMessage: "Unauthorized");
+            return System.Threading.Tasks.Task.CompletedTask;
         }
     };
     options.RequireHttpsMetadata = false;

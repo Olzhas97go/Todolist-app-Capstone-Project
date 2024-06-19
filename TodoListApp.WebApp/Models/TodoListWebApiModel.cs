@@ -13,5 +13,5 @@ public class TodoListWebApiModel
     [StringLength(250, ErrorMessage = "Description cannot be more than 250 characters.")]
     public string? Description { get; set; }
     [Required(ErrorMessage = "The Tasks field is required.")]
-    public List<TodoTaskDto> Tasks { get; set; } = new List<TodoTaskDto>();
+    public List<TodoTaskDto> Tasks { get; set; } = new();
 }
