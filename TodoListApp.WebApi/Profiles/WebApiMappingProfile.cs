@@ -3,11 +3,10 @@
 using AutoMapper;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Tasks;
+using TodoListApp.WebApi.Models.Models;
 
 public class WebApiMappingProfile : Profile
 {
-    private readonly IMapper _mapper;
-
     public WebApiMappingProfile()
     {
         CreateMap<TodoListDto, TodoListEntity>()
@@ -18,7 +17,7 @@ public class WebApiMappingProfile : Profile
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => ToDoTaskStatus.InProgress))
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => 1))
-            .ForMember(dest => dest.Tasks, opt => opt.MapFrom(src => _mapper.Map<List<TaskModel>>(src.Tasks)));
+            .ForMember(dest => dest.Tasks, opt => opt.MapFrom(src => src.Tasks));
 
         CreateMap<TodoListEntity, TodoListModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -28,6 +27,14 @@ public class WebApiMappingProfile : Profile
 
         CreateMap<TodoListModel, TodoListEntity>()
             .ForMember(dest => dest.Tasks, opt => opt.Ignore());
+
+        CreateMap<TaskEntity, TodoTaskDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src => src.IsCompleted))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedDate))
+            .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate));
+
 
         CreateMap<TodoListDto, TodoListModel>().ReverseMap();
 

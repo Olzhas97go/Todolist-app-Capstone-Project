@@ -149,8 +149,14 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 
     public async Task<TodoListEntity> GetTodoListByIdAsync(int id)
     {
-        return await _context.TodoLists
-            .Include(t => t.Tasks) // Include tasks
-            .FirstOrDefaultAsync(t => t.Id == id);
+        var todoListEntity = await _context.TodoLists
+            .Include(tl => tl.Tasks) // Eager loading
+            .FirstOrDefaultAsync(tl => tl.Id == id);
+
+        if (todoListEntity == null)
+        {
+            return null;  // Return null if no to-do list is found
+        }
+        return todoListEntity;
     }
 }

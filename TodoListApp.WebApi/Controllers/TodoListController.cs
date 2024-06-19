@@ -167,6 +167,7 @@ public class TodoListController : ControllerBase
         catch (Exception ex)
         {
             // Log the exception
+            _logger.LogError("An error occurred while retrieving the todo list: {ExceptionMessage}\n{ExceptionStackTrace}", ex.Message, ex.StackTrace);
             return StatusCode(500, new { Error = "An error occurred while retrieving the todo list." });
         }
     }

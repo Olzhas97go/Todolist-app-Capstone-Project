@@ -197,6 +197,8 @@ public class TodoListController : Controller
 
             if (task == null)
             {
+            _logger.LogInformation("Tasks in the TodoList: {Tasks}", string.Join(", ", todoListDto.Tasks.Select(t => t.Id)));
+
                 return NotFound();
             }
 
