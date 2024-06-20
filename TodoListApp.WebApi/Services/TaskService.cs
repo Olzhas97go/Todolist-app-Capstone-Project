@@ -23,7 +23,7 @@ public class TaskService : ITaskService
     }
 
 
-    public async Task<List<TaskModel>> GetTasksForTodoListAsync(int todoListId)
+    public async Task<List<TodoTask>> GetTasksForTodoListAsync(int todoListId)
     {
         try
         {
@@ -31,7 +31,7 @@ public class TaskService : ITaskService
                 .Where(t => t.TodoListId == todoListId)
                 .ToListAsync();
 
-            var taskModels = _mapper.Map<List<TaskModel>>(taskEntities);
+            var taskModels = _mapper.Map<List<TodoTask>>(taskEntities);
 
             // Determine if a task is overdue and set IsOverdue property
             foreach (var task in taskModels)
@@ -48,7 +48,7 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<TaskModel> GetTaskByIdAsync(int taskId)
+    public async Task<TodoTask> GetTaskByIdAsync(int taskId)
     {
         try
         {
@@ -58,7 +58,7 @@ public class TaskService : ITaskService
                 return null; // Task not found
             }
 
-            var taskModel = _mapper.Map<TaskModel>(taskEntity);
+            var taskModel = _mapper.Map<TodoTask>(taskEntity);
             taskModel.IsOverdue = taskModel.DueDate.HasValue && taskModel.DueDate < DateTime.Now;
             return taskModel;
         }
@@ -69,7 +69,7 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<TaskModel> AddTaskAsync(TaskEntity taskEntity)
+    public async Task<TodoTask> AddTaskAsync(TaskEntity taskEntity)
     {
         // 1. Validate TodoListId:
         var todoListExists = await _context.TodoLists.AnyAsync(tl => tl.Id == taskEntity.TodoListId);
@@ -96,7 +96,7 @@ public class TaskService : ITaskService
         _logger.LogInformation("Created task with ID {TaskId} for user {UserId}", taskEntity.Id, taskEntity.UserId);
 
         // 6. Return Result:
-        return _mapper.Map<TaskModel>(taskEntity); // Map back to TaskModel using AutoMapper
+        return _mapper.Map<TodoTask>(taskEntity); // Map back to TodoTask using AutoMapper
     }
 
 
@@ -122,7 +122,7 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<TaskModel> UpdateTaskAsync(int taskId, TaskModel updatedTask)
+    public async Task<TodoTask> UpdateTaskAsync(int taskId, TodoTask updatedTodoTask)
     {
         try
         {
@@ -135,14 +135,14 @@ public class TaskService : ITaskService
 
             // 2. Check concurrency token
 
-            // 3. Map the updated TaskModel to TaskEntity
-            _mapper.Map(updatedTask, existingTask); // Use AutoMapper
+            // 3. Map the updated TodoTask to TaskEntity
+            _mapper.Map(updatedTodoTask, existingTask); // Use AutoMapper
 
             // 4. Save changes to the database
             try
             {
                 await _context.SaveChangesAsync();
-                return _mapper.Map<TaskModel>(existingTask);
+                return _mapper.Map<TodoTask>(existingTask);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -150,12 +150,12 @@ public class TaskService : ITaskService
                 _context.Entry(existingTask).Reload();
 
                 // Map the updated values (except RowVersion) to the reloaded entity
-                _mapper.Map(updatedTask, existingTask);
+                _mapper.Map(updatedTodoTask, existingTask);
 
                 // Retry saving changes
                 await _context.SaveChangesAsync();
 
-                return _mapper.Map<TaskModel>(existingTask);
+                return _mapper.Map<TodoTask>(existingTask);
             }
         }
         catch (ArgumentException ex)
@@ -170,7 +170,7 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<TaskModel> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus)
+    public async Task<TodoTask> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus)
     {
         // 1. Get the user ID from the token claims (same as in your TodoListController)
 
@@ -187,6 +187,6 @@ public class TaskService : ITaskService
         await _context.SaveChangesAsync();
 
         // 5. Return the updated task (optional)
-        return _mapper.Map<TaskModel>(taskEntity);
+        return _mapper.Map<TodoTask>(taskEntity);
     }
 }

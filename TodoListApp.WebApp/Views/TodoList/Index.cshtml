@@ -5,20 +5,12 @@
 <ul>
     @foreach (var todoList in Model)
     {
-        <li>
-            @todoList.Name
-            <a asp-action="Details" asp-route-id="@todoList.Id">View Tasks</a>
-        </li>
-    }
-</ul>
-
-@foreach (var todoList in Model)
-{
-    <li>
+    <li class="todo-list-item">
         @todoList.Name
-        <a asp-action="Details" asp-route-id="@todoList.Id">View Tasks</a>
-        <form method="post" asp-action="Delete" asp-route-id="@todoList.Id">
-            <button type="submit">Delete</button>
+        <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@todoList.Id">View Tasks</a>
+        <form method="post" asp-action="Delete" asp-route-id="@todoList.Id" class="delete-form">
+            <button type="submit" class="delete-button">Delete</button>
         </form>
     </li>
-}
+    }
+</ul>

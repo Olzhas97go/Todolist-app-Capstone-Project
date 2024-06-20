@@ -5,15 +5,15 @@ using TodoListApp.WebApi.Models;
 
 public interface ITaskService
 {
-    Task<List<TaskModel>> GetTasksForTodoListAsync(int todoListId);  // US05
+    Task<List<TodoTask>> GetTasksForTodoListAsync(int todoListId);  // US05
 
-    Task<TaskModel> GetTaskByIdAsync(int taskId);                   // US06
+    Task<TodoTask> GetTaskByIdAsync(int taskId);                   // US06
 
-    Task<TaskModel> AddTaskAsync(TaskEntity taskEntity); // US07
+    Task<TodoTask> AddTaskAsync(TaskEntity taskEntity); // US07
 
     Task<bool> DeleteTaskAsync(int taskId);                         // US08
 
-    Task<TaskModel> UpdateTaskAsync(int taskId, TaskModel updatedTask);
+    Task<TodoTask> UpdateTaskAsync(int taskId, TodoTask updatedTodoTask);
 
-    Task<TaskModel> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus);
+    Task<TodoTask> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus);
 }

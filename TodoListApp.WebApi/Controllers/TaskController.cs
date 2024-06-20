@@ -29,7 +29,7 @@ public class TaskController : ControllerBase
 
 
     [HttpGet("{todoListId}/tasks")]
-    public async Task<ActionResult<List<TaskModel>>> GetTasks(int todoListId)
+    public async Task<ActionResult<List<TodoTask>>> GetTasks(int todoListId)
     {
         var tasks = await _taskService.GetTasksForTodoListAsync(todoListId);
         return Ok(tasks);
@@ -37,7 +37,7 @@ public class TaskController : ControllerBase
 
     [HttpPost("{todoListId}/tasks")] // POST /api/tasks/{todoListId}/tasks
     [Authorize]
-    public async Task<ActionResult<TaskModel>> AddTask(int todoListId, [FromBody] TaskModel newTask)
+    public async Task<ActionResult<TodoTask>> AddTask(int todoListId, [FromBody] TodoTask newTodoTask)
     {
         try
         {
@@ -54,8 +54,8 @@ public class TaskController : ControllerBase
 
             var taskEntity = new TaskEntity
             {
-                Title = newTask.Title,
-                Description = newTask.Description,
+                Title = newTodoTask.Title,
+                Description = newTodoTask.Description,
                 TodoListId = todoListId,
                 CreatedDate = DateTime.Now,
                 Status = ToDoTaskStatus.NotStarted, // Assuming you have an enum for task status
@@ -82,7 +82,7 @@ public class TaskController : ControllerBase
 
 
     [HttpGet("{taskId}")]  // GET /api/tasks/{taskId}
-    public async Task<ActionResult<TaskModel>> GetTaskById(int taskId)
+    public async Task<ActionResult<TodoTask>> GetTaskById(int taskId)
     {
         try
         {
@@ -102,16 +102,16 @@ public class TaskController : ControllerBase
 
     // TaskController.cs
     [HttpPut("{taskId}")]  // PUT /api/tasks/{taskId}
-    public async Task<ActionResult<TaskModel>> UpdateTask(int taskId, [FromBody] TaskModel updatedTask)
+    public async Task<ActionResult<TodoTask>> UpdateTask(int taskId, [FromBody] TodoTask updatedTodoTask)
     {
-        if (taskId != updatedTask.Id)
+        if (taskId != updatedTodoTask.Id)
         {
             return BadRequest("Task ID mismatch");
         }
 
         try
         {
-            var updated = await _taskService.UpdateTaskAsync(taskId, updatedTask);
+            var updated = await _taskService.UpdateTaskAsync(taskId, updatedTodoTask);
             if (updated == null)
             {
                 return NotFound(); // Task not found

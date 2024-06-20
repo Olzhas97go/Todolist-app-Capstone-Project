@@ -1,4 +1,6 @@
-﻿namespace TodoListApp.WebApp.Models;
+﻿using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApp.Models;
 
 public class TodoList
 {
@@ -7,4 +9,7 @@ public class TodoList
     public string Name { get; set; } = string.Empty;
 
     public string? Description { get; set; }
+
+    public List<TodoTaskDto> Tasks { get; set; } = new List<TodoTaskDto>();
+
 }

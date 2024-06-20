@@ -4,6 +4,7 @@ using AutoMapper;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Tasks;
 using TodoListApp.WebApi.Models.Models;
+using TodoListApp.WebApi.Entities;
 
 public class WebApiMappingProfile : Profile
 {
@@ -37,8 +38,11 @@ public class WebApiMappingProfile : Profile
 
 
         CreateMap<TodoListDto, TodoListModel>().ReverseMap();
+        CreateMap<TodoListEntity, TodoListDetailsDto>()
+            .ForMember(dest => dest.TaskIds, opt => opt.MapFrom(src => src.Tasks.Select(t => t.Id)));
 
-        CreateMap<TaskEntity, TaskModel>()
+
+        CreateMap<TaskEntity, TodoTask>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))

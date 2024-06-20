@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Models.Tasks;
+using TodoListApp.WebApi.Entities;
 
 
 [ApiController]
@@ -161,8 +162,8 @@ public class TodoListController : ControllerBase
                 return NotFound();
             }
 
-            var todoListDto = _mapper.Map<TodoListDto>(todoListEntity);
-            return Ok(todoListDto);
+            var todoListDetailsDto = _mapper.Map<TodoListDetailsDto>(todoListEntity);
+            return Ok(todoListDetailsDto);
         }
         catch (Exception ex)
         {

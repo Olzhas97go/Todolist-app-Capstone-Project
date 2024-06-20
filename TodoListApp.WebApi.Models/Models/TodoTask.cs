@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class TaskModel
+public class TodoTask
 {
     [Key]
     public int Id { get; set; }
@@ -12,6 +12,7 @@ public class TaskModel
     public string Title { get; set; }
 
     public string? Description { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? DueDate { get; set; }
 
@@ -20,4 +21,5 @@ public class TaskModel
     public int TodoListId { get; set; }
 
     public bool IsOverdue { get; set; } // For US10
+    public ToDoTaskStatus Status { get; set; }
 }

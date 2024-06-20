@@ -1,0 +1,19 @@
+﻿@model TodoListWithTasksViewModel
+<h2>@Model.TodoList.Name - Tasks</h2>
+
+@if (Model.Tasks != null && Model.Tasks.Any())
+{
+    <ul>
+        @foreach (var task in Model.Tasks)
+        {
+            <li>
+                @task.Title - (@task.IsCompleted ? "Completed" : "Not Completed")
+                <a asp-action="Details" asp-route-todoListId="@Model.TodoList.Id" asp-route-taskId="@task.Id">Details</a>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No tasks found for this to-do list.</p>
+}
