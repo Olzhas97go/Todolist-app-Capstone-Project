@@ -11,5 +11,10 @@
       "usingDirectivesPlacement": "outsideNamespace",
       "blankLinesBetweenUsingGroups": "omit"
     }
+  },
+  "rules": {
+    "SA1200": {
+      "enabled": false
+    }
   }
 }

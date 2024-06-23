@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,32 +25,47 @@ mapperConfig.AssertConfigurationIsValid(); // This will throw an exception if th
 builder.Services.AddDbContext<WebAppContext>(options =>
     options.UseSqlServer(connectionString));
 
-var issuerSigningKey = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("Keys")["TokenSigningKey"]);
-
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<WebAppContext>();
 
-builder.Services.AddAuthentication().AddJwtBearer(options =>
+
+var tokenSigningKey = builder.Configuration["Jwt:TokenSigningKey"];
+if (string.IsNullOrEmpty(tokenSigningKey))
 {
-    options.Events = new JwtBearerEvents
+    throw new InvalidOperationException("JWT TokenSigningKey is not found in the configuration.");
+}
+var key = Encoding.ASCII.GetBytes(tokenSigningKey);
+
+builder.Services.AddAuthentication()
+    .AddCookie(options => {
+        options.LoginPath = "/Identity/Account/Login/";
+        options.AccessDeniedPath = "/Identity/Account/Login/";
+    })
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>  // Name the scheme "Bearer"
     {
-        OnTokenValidated = context =>
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = userManager.GetUserAsync(context.HttpContext.User);
-            if (user == null) context.Fail(failureMessage: "Unauthorized");
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-    };
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(issuerSigningKey),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Issuer"], // Same as issuer for your scenario
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:TokenSigningKey"]))
+        };
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CreateTodoListPolicy", policy =>
+        policy.RequireAuthenticatedUser() // User must be logged in
+            .RequireClaim(ClaimTypes.Role, "Admin")); // User must have the "Admin" role
+});
+builder.Services.AddDistributedMemoryCache(); // Use in-memory cache for session (simplest option)
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
+    options.Cookie.HttpOnly = true; // Important for security
+    options.Cookie.IsEssential = true;
 });
  // Replace with your actual Web API base URL
 builder.Services.AddAutoMapper(typeof(MappingProfile)); // Update the namespace accordingly
@@ -56,15 +73,22 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<ITodoListWebApiService, TodoListWebApiService>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<JwtConfiguration>();
+builder.Services.AddScoped<IUserManager, UserManagementService>();
+builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtProvider>();
+builder.Services.AddScoped<IApiHeaderService, ApiHeaderService>();
+builder.Services.AddTransient<TokenDelegatingHandler>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddRefitClient<ITodoListApi>()
     .ConfigureHttpClient(c =>
     {
         c.BaseAddress = new Uri(builder.Configuration["ApiSettings:TodoListApiBaseUrl"]);
         c.Timeout = TimeSpan.FromSeconds(10); // Example of a custom timeout
-    });
-
+    })
+    .AddHttpMessageHandler<TokenDelegatingHandler>();
 builder.Services.AddRazorPages();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAnyOrigin", builder =>
@@ -90,7 +114,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication();;
+
+app.UseSession();
+
+app.UseMiddleware<JwtTokenMiddleware>();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
@@ -99,7 +128,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 app.Run();

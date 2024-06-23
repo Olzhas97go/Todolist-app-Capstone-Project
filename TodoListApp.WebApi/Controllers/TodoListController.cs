@@ -1,16 +1,16 @@
-﻿namespace TodoListApp.WebApi.Controllers;
-
+﻿using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using TodoListApp.WebApi.Data;
-using TodoListApp.WebApi.Models.Tasks;
-using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Models.Models;
 
+namespace TodoListApp.WebApi.Controllers;
 
 [ApiController]
 [Route("api/todolist")]
@@ -46,6 +46,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<TodoListDto>> CreateTodoList([FromBody] TodoListDto todoListDto)
     {
         if (!ModelState.IsValid)
@@ -79,6 +80,7 @@ public class TodoListController : ControllerBase
 
 
     [HttpDelete("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> DeleteTodoList(int id)
     {
         try
@@ -137,7 +139,7 @@ public class TodoListController : ControllerBase
 
 
     [HttpGet("GetMyTodoLists")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult GetMyTodoLists([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -152,24 +154,29 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult> GetTodoListById(int id)
     {
-        try
-        {
-            var todoListEntity = await _service.GetTodoListByIdAsync(id);
-            if (todoListEntity == null)
-            {
-                return NotFound();
-            }
+        // 1. Verify Authorization (JWT Token)
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-            var todoListDetailsDto = _mapper.Map<TodoListDetailsDto>(todoListEntity);
-            return Ok(todoListDetailsDto);
-        }
-        catch (Exception ex)
+        if (userIdClaim == null)
         {
-            // Log the exception
-            _logger.LogError("An error occurred while retrieving the todo list: {ExceptionMessage}\n{ExceptionStackTrace}", ex.Message, ex.StackTrace);
-            return StatusCode(500, new { Error = "An error occurred while retrieving the todo list." });
+            _logger.LogWarning("Missing User ID claim in JWT token.");
+            return Unauthorized("Unauthorized access.");
         }
+
+        var userId = userIdClaim.Value;
+
+        // 2. Verify ID (Ownership)
+        var todoListEntity = await _service.GetTodoListByIdAsync(id);
+        if (todoListEntity == null)
+        {
+            return NotFound();
+        }
+
+        // 3. Map and Return
+        var todoListDetailsDto = _mapper.Map<TodoListDetailsDto>(todoListEntity);
+        return Ok(todoListDetailsDto);
     }
 }

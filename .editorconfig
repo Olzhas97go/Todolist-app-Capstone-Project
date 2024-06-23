@@ -273,7 +273,7 @@ dotnet_diagnostic.SA1110.severity = warning   # OpeningParenthesisMustBeOnDeclar
 dotnet_diagnostic.SA1121.severity = error     # UseBuiltInTypeAlias
 dotnet_diagnostic.SA1133.severity = none      # DoNotCombineAttributes
 # Ordering rules
-dotnet_diagnostic.SA1200.severity = error     # UsingDirectivesMustBePlacedCorrectly
+dotnet_diagnostic.SA1200.severity = none
 # Maintainability rules
 dotnet_diagnostic.SA1400.severity = error     # AccessModifierMustBeDeclared
 # Layout rules

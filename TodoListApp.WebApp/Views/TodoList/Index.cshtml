@@ -1,16 +1,34 @@
 ﻿@model IEnumerable<TodoListApp.WebApp.Models.TodoListWebApiModel>
 
-<h1>Todo Lists</h1>
+<div class="card">
+    <div class="card-header">
+        <h2>Todo Lists</h2>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+        <ul class="list-group list-group-flush"> @foreach (var todoList in Model)
+            {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    @todoList.Name
+                    <div class="btn-group">
+                        <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@todoList.Id" class="btn btn-sm btn-info">View Tasks</a>
+                        <a asp-action="Edit" asp-route-id="@todoList.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <form method="post" asp-action="Delete" asp-route-id="@todoList.Id" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+            }
+        </ul>
+        }
+        else
+        {
+        <p>No todo lists found.</p>
+        }
 
-<ul>
-    @foreach (var todoList in Model)
-    {
-    <li class="todo-list-item">
-        @todoList.Name
-        <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@todoList.Id">View Tasks</a>
-        <form method="post" asp-action="Delete" asp-route-id="@todoList.Id" class="delete-form">
-            <button type="submit" class="delete-button">Delete</button>
-        </form>
-    </li>
-    }
-</ul>
+        <a asp-action="Create" class="btn btn-primary mt-3">Create New List</a>
+    </div>
+</div>

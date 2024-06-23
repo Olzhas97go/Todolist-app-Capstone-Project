@@ -67,7 +67,7 @@ namespace TodoListApp.WebApi.Migrations
 
                     b.HasIndex("TodoListId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("TodoListApp.WebApi.Models.TodoListEntity", b =>
@@ -88,7 +88,7 @@ namespace TodoListApp.WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TodoLists");
+                    b.ToTable("TodoLists", (string)null);
                 });
 
             modelBuilder.Entity("TodoListApp.WebApi.Models.Tasks.TaskEntity", b =>

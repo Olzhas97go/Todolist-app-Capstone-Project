@@ -35,6 +35,11 @@ body {
     width: 50%;
 }
 
+#taskList {
+    list-style-type: none; /* Remove default list style */
+    padding: 0;           /* Remove default padding */
+}
+
 .login-logout-card a.nav-link {
     font-size: 1rem;
     color: #495057;

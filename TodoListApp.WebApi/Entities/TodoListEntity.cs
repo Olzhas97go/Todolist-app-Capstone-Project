@@ -1,8 +1,9 @@
-﻿namespace TodoListApp.WebApi.Models;
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TodoListApp.WebApi.Models.Tasks;
+using TodoListApp.WebApi.Entities;
+
+namespace TodoListApp.WebApi.Entities;
+
 
 public class TodoListEntity
 {

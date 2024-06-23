@@ -1,9 +1,11 @@
-﻿    namespace TodoListApp.WebApi.Interfaces;
+﻿using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
 
-    using TodoListApp.WebApi.Models;
+namespace TodoListApp.WebApi.Interfaces;
 
-    public interface ITodoListDatabaseService
-    {
+public interface ITodoListDatabaseService
+{
         Task<List<TodoListModel>> GetAllTodoListsAsync();
 
         Task<TodoListDto> CreateTodoListAsync(TodoListDto newTodoListDto);
@@ -17,4 +19,4 @@
         Task<TodoListEntity> GetTodoListByIdAsync(int id);
 
         Task<bool> TodoListExists(int id);
-    }
+}

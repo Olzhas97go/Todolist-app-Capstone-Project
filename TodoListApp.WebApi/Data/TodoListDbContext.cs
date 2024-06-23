@@ -1,10 +1,11 @@
-﻿namespace TodoListApp.WebApi.Data;
-
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Models;
-using TodoListApp.WebApi.Models.Tasks;
+
+namespace TodoListApp.WebApi.Data;
+
 public class TodoListDbContext : DbContext
 {
     public TodoListDbContext(DbContextOptions<TodoListDbContext> options)

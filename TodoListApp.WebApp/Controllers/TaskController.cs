@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Refit;
@@ -12,8 +13,9 @@ using Task = Microsoft.Build.Utilities.Task;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Models.Models;
-using TodoListApp.WebApi.Models.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TodoListApp.WebApp.Models.TaskModels;
+
 namespace TodoListApp.WebApp.Controllers;
 
 public class TaskController : Controller
@@ -128,6 +130,98 @@ public class TaskController : Controller
             // Catch any other unexpected exceptions and rethrow
             this._logger.LogError(ex, "An unexpected error occurred.");
             throw; // Rethrow the exception
+        }
+    }
+
+    [HttpGet("{todoListId}/CreateTask")]
+    public async Task<IActionResult> CreateTask(int todoListId)
+    {
+        try
+        {
+            var todoListDto = await _todoListApi.GetTodoListById(todoListId);
+            if (todoListDto == null)
+            {
+                return NotFound("To-do list not found.");
+            }
+
+            var viewModel = new CreateTaskViewModel
+            {
+                TodoListId = todoListId, TodoListName = todoListDto.Name, DueDate = DateTime.Today
+            };
+
+            return View(viewModel);
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, "API error while fetching todo list for creating a task: {StatusCode}", ex.StatusCode);
+            return StatusCode((int)ex.StatusCode);
+        }
+    }
+
+
+    [HttpPost("{todoListId}/CreateTask")]
+    public async Task<IActionResult> CreateTask(int todoListId, CreateTaskViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var todoListDto = await _todoListApi.GetTodoListById(todoListId);
+            if (todoListDto != null)
+            {
+                viewModel.TodoListName = todoListDto.Name;
+            }
+            else
+            {
+                ModelState.AddModelError("", "An error occurred while fetching the to-do list.");
+            }
+
+            //return View(viewModel);
+        }
+
+        try
+        {
+            var todoTaskDto = _mapper.Map<TodoTaskDto>(viewModel);
+
+            // Get the user's ID from the claims
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            todoTaskDto.TodoListId = todoListId; // Set the todoListId
+
+            // Create the task on the API
+            var newTask = await _todoListApi.AddTask(todoListId, todoTaskDto);
+
+            return RedirectToAction("ViewTasks", new { todoListId = viewModel.TodoListId });
+        }
+        catch (Exception ex)
+        {
+            if (ex is ApiException apiEx) // Check if it's an ApiException
+            {
+                _logger.LogError(apiEx, "API error while creating task: {StatusCode} - {Message}", apiEx.StatusCode, apiEx.Message);
+
+                if (apiEx.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    var errorContent = await apiEx.GetContentAsAsync<ValidationProblemDetails>();
+                    foreach (var error in errorContent.Errors)
+                    {
+                        ModelState.AddModelError(error.Key, string.Join(", ", error.Value));
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating the task.");
+                }
+
+                // ... (re-fetch todoListDto and return View - same as before)
+            }
+            else if (ex is DbUpdateException dbEx)
+            {
+                // ... (database error handling - same as before)
+            }
+            else // Catch-all for unexpected errors
+            {
+                _logger.LogError(ex, "An unexpected error occurred while creating the task.");
+                throw; // Rethrow the exception to be handled globally
+            }
+
+            return View(viewModel); // Return the view if there was any error
         }
     }
 }

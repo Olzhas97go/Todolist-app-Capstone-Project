@@ -1,4 +1,7 @@
-﻿namespace TodoListApp.WebApi.Services;
+﻿using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApi.Services;
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

@@ -1,9 +1,9 @@
-﻿namespace TodoListApp.WebApi.Models.Tasks;
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using TodoListApp.WebApi.Models;
+
+namespace TodoListApp.WebApi.Entities;
 
 public class TaskEntity
 {

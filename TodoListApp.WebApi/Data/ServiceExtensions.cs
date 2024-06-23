@@ -1,43 +1,55 @@
-﻿namespace TodoListApp.WebApi.Data;
-
+﻿using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using TodoListApp.WebApi.Data;
-using TodoListApp.WebApi.Interfaces;
-using TodoListApp.WebApi.Services;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
-using TodoListApp.WebApi.Controllers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using TodoListApp.WebApi.Controllers;
+using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Profiles;
+using TodoListApp.WebApi.Services;
 
+namespace TodoListApp.WebApi.Data;
 
 public static class ServiceExtensions
 {
     public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
+        var tokenSigningKey = configuration["Jwt:TokenSigningKey"];
+        if (string.IsNullOrEmpty(tokenSigningKey))
+        {
+            throw new InvalidOperationException("JWT TokenSigningKey is not configured.");
+        }
+
+        var issuerSigningKey = Encoding.UTF8.GetBytes(tokenSigningKey);// Use configuration passed in
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Keys:TokenSigningKey"])),
-                    ValidateIssuer = configuration.GetValue<bool>("Jwt:ValidateIssuer"),
-                    ValidateAudience = configuration.GetValue<bool>("Jwt:ValidateAudience")
+                    IssuerSigningKey = new SymmetricSecurityKey(issuerSigningKey),
+                    ValidateIssuer = configuration.GetValue<bool>("Jwt:ValidateIssuer", false), // Get from config with default
+                    ValidateAudience = configuration.GetValue<bool>("Jwt:ValidateAudience", false), // Get from config with default
+                    ValidateLifetime = true // Important: Validate token lifetime
                 };
+
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-                        var logger = loggerFactory.CreateLogger<JwtBearerHandler>();
-                        logger.LogInformation("Received token from cookie: {Token}", context.Request.Cookies["jwtToken"]); // Log the received token
-                        context.Token = context.Request.Cookies["jwtToken"];
+                        // Optional: Extract token from cookie if needed
+                        var token = context.Request.Cookies["jwtToken"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            context.Token = token;
+                        }
+
                         return Task.CompletedTask;
                     },
                 };

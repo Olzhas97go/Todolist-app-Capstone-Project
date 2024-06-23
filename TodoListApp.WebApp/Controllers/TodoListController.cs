@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using Refit;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Models;
-using TodoListApp.WebApi.Models.Tasks;
 using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Models;
 
@@ -75,7 +74,6 @@ public class TodoListController : Controller
     {
         return View(new TodoListWebApiModel { Tasks = new List<TodoTaskDto> { new TodoTaskDto() } });
     }
-
 
 
 
@@ -150,7 +148,9 @@ public class TodoListController : Controller
         var todoListDto = await _todoListApi.GetTodoListById(id);
 
         if (todoListDto == null)
-            return NotFound();
+        {
+            return this.NotFound();
+        }
 
         var todoListWebApiModel = _mapper.Map<TodoListWebApiModel>(todoListDto);
         return View(todoListWebApiModel);

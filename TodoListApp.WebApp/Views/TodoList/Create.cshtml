@@ -2,6 +2,15 @@
 
 <h2>Create To-Do List</h2>
 
+@if (TempData["ErrorMessage"] != null)
+{
+<div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+else if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
 <form method="post" asp-action="Create">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -22,29 +31,33 @@
         <ul id="taskList">
             @for (int i = 0; i < Model.Tasks.Count; i++)
             {
-                <li>
-                    <input asp-for="Tasks[i].Description" class="form-control" />
-                    <span asp-validation-for="Tasks[i].Description" class="text-danger"></span>
-                </li>
+            <li>
+                <input asp-for="Tasks[i].Description" class="form-control" />
+                <span asp-validation-for="Tasks[i].Description" class="text-danger"></span>
+            </li>
             }
         </ul>
         <button type="button" id="addTaskButton" class="btn btn-secondary">Add Task</button>
     </div>
 
-    <button type="submit" class="btn btn-primary">Create</button>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <br/>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
 </form>
 
 <script>
     document.getElementById("addTaskButton").addEventListener("click", function() {
         const taskList = document.getElementById("taskList");
-        const newIndex = taskList.children.length - 1; // Exclude the button
+        const newIndex = taskList.children.length; // Get the correct new index
 
         const newListItem = document.createElement("li");
         newListItem.innerHTML = `
-            <input type="text" class="form-control" name="Tasks[${newIndex}]" value="" />
-            <span class="text-danger field-validation-valid" data-valmsg-for="Tasks[${newIndex}]" data-valmsg-replace="true"></span>
+            <input type="text" class="form-control" name="Tasks[${newIndex}].Description" value="" />
+            <span class="text-danger field-validation-valid" data-valmsg-for="Tasks[${newIndex}].Description" data-valmsg-replace="true"></span>
         `;
 
-        taskList.insertBefore(newListItem, taskList.lastElementChild);
+        taskList.appendChild(newListItem);
     });
 </script>

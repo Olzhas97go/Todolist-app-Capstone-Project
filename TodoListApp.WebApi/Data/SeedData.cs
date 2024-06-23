@@ -1,11 +1,12 @@
-﻿namespace TodoListApp.WebApi.Models // Or your preferred namespace
-{
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection; // Add this for dependency injection
-    using Microsoft.Extensions.Logging; // Add this for logging
-    using TodoListApp.WebApi.Data;
-    using TodoListApp.WebApi.Models.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Models;
 
+namespace TodoListApp.WebApi.Data
+{
     public static class SeedData
     {
         public static void EnsurePopulated(IApplicationBuilder app)

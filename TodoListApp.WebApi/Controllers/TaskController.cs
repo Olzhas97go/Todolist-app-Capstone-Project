@@ -1,14 +1,16 @@
-﻿namespace TodoListApp.WebApi.Controllers;
-using Microsoft.AspNetCore.Authorization;
-
+﻿using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TodoListApp.WebApi.Interfaces;
-using TodoListApp.WebApi.Models.Tasks;
-using System.Security.Claims;
-using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Interfaces;
+using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApi.Controllers;
+
 
 [ApiController]
 [Route("api/task")]

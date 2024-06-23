@@ -1,7 +1,10 @@
-﻿namespace TodoListApp.WebApi.Interfaces;
-
-using TodoListApp.WebApi.Models.Tasks;
+﻿using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApi.Interfaces;
+
+
 
 public interface ITaskService
 {

@@ -1,13 +1,15 @@
-﻿
-namespace TodoListApp.WebApi.Services;
-
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Interfaces;
-using TodoListApp.WebApi.Models.Tasks;
 using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApi.Services;
+
+
 
 public class TaskService : ITaskService
 {

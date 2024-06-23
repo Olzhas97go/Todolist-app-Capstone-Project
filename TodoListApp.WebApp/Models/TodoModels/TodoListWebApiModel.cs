@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TodoListApp.WebApi.Models.Models;
-using TodoListApp.WebApi.Models.Tasks;
 
 namespace TodoListApp.WebApp.Models;
 

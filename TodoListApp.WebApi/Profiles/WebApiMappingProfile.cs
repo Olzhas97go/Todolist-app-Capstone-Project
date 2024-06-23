@@ -1,10 +1,9 @@
-﻿namespace TodoListApp.WebApi.Profiles;
-
-using AutoMapper;
-using TodoListApp.WebApi.Models;
-using TodoListApp.WebApi.Models.Tasks;
-using TodoListApp.WebApi.Models.Models;
+﻿using AutoMapper;
 using TodoListApp.WebApi.Entities;
+using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
+
+namespace TodoListApp.WebApi.Profiles;
 
 public class WebApiMappingProfile : Profile
 {

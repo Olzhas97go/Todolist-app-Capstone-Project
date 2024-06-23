@@ -1,7 +1,8 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using TodoListApp.WebApi.Models;
-using Microsoft.AspNetCore.Http;
+using TodoListApp.WebApi.Models.Models;
 using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Models;
 

@@ -1,6 +1,6 @@
-﻿namespace TodoListApp.WebApi.Models.Models;
+﻿using TodoListApp.WebApi.Models;
 
-using TodoListApp.WebApi.Models;
+namespace TodoListApp.WebApi.Models.Models;
 
 public class TodoTaskDto
 {

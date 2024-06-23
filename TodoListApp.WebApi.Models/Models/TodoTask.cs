@@ -1,7 +1,6 @@
-﻿namespace TodoListApp.WebApi.Models.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-
-using System.ComponentModel.DataAnnotations;
+namespace TodoListApp.WebApi.Models.Models;
 
 public class TodoTask
 {

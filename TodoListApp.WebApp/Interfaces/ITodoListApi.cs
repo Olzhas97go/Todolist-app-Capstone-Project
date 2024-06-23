@@ -2,7 +2,7 @@
 using Refit;
 using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Models;
-using TodoListApp.WebApi.Models.Tasks;
+using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApp.Interfaces;
 
@@ -30,4 +30,7 @@ public interface ITodoListApi
 
     [Get("/api/task/{taskId}")] // Get a single task
     Task<TodoTask> GetTaskByIdAsync(int taskId);
+
+    [Post("/api/task/{todoListId}/tasks")] // Update the route
+    Task<TodoTaskDto> AddTask(int todoListId, [Body] TodoTaskDto taskDto);
 }

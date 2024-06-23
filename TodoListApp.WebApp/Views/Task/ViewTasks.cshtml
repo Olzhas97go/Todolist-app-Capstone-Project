@@ -1,19 +1,30 @@
 ﻿@model TodoListWithTasksViewModel
-<h2>@Model.TodoList.Name - Tasks</h2>
 
-@if (Model.Tasks != null && Model.Tasks.Any())
-{
-    <ul>
-        @foreach (var task in Model.Tasks)
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center"> <h2>@Model.TodoList.Name - Tasks</h2>
+        <a asp-action="Index" asp-controller="TodoList" class="btn btn-secondary">Back to Lists</a> </div>
+    <div class="card-body">
+        @if (Model.Tasks != null && Model.Tasks.Any())
         {
-            <li>
-                @task.Title - (@task.IsCompleted ? "Completed" : "Not Completed")
-                <a asp-action="Details" asp-route-todoListId="@Model.TodoList.Id" asp-route-taskId="@task.Id">Details</a>
+        <ul class="list-group list-group-flush">
+            @foreach (var task in Model.Tasks)
+            {
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-md-8">
+                        @task.Title - (@task.IsCompleted ? "Completed" : "Not Completed")
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a asp-action="Details" asp-route-todoListId="@Model.TodoList.Id" asp-route-taskId="@task.Id" class="btn btn-sm btn-info">Details</a>
+                    </div>
+                </div>
             </li>
+            }
+        </ul>
         }
-    </ul>
-}
-else
-{
-    <p>No tasks found for this to-do list.</p>
-}
+        else
+        {
+        <p>No tasks found for this to-do list.</p>
+        }
+    </div>
+</div>

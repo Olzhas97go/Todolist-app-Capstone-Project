@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +21,8 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    public IActionResult Index()
+     [Authorize]
+     public IActionResult Index()
     {
         ViewData["UserID"]=_userManager.GetUserId(this.User);
         return View();
