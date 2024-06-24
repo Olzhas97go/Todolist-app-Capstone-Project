@@ -54,6 +54,11 @@ public class TaskController : Controller
         }
         catch (ApiException ex)
         {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Unauthorized access - redirect to login or handle as needed
+                return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+            }
             _logger.LogError(ex, "API error while fetching todo list details.");
             return View("Error",
                 new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
@@ -153,6 +158,11 @@ public class TaskController : Controller
         }
         catch (ApiException ex)
         {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Unauthorized access - redirect to login or handle as needed
+                return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+            }
             _logger.LogError(ex, "API error while fetching todo list for creating a task: {StatusCode}", ex.StatusCode);
             return StatusCode((int)ex.StatusCode);
         }

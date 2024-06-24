@@ -7,17 +7,21 @@
     <div class="card-body">
         @if (Model.Any())
         {
-        <ul class="list-group list-group-flush"> @foreach (var todoList in Model)
+        <ul class="list-group list-group-flush">
+            @foreach (var todoList in Model)
             {
             <li class="list-group-item">
                 <div class="d-flex justify-content-between align-items-center">
                     @todoList.Name
                     <div class="btn-group">
                         <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@todoList.Id" class="btn btn-sm btn-info">View Tasks</a>
+                        @if (User.Identity.IsAuthenticated)
+                        {
                         <a asp-action="Edit" asp-route-id="@todoList.Id" class="btn btn-sm btn-warning">Edit</a>
                         <form method="post" asp-action="Delete" asp-route-id="@todoList.Id" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                         </form>
+                        }
                     </div>
                 </div>
             </li>
@@ -29,6 +33,9 @@
         <p>No todo lists found.</p>
         }
 
+        @if (User.Identity.IsAuthenticated)
+        {
         <a asp-action="Create" class="btn btn-primary mt-3">Create New List</a>
+        }
     </div>
 </div>

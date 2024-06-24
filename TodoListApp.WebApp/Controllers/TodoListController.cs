@@ -72,6 +72,10 @@ public class TodoListController : Controller
     [HttpGet("Create")]
     public IActionResult Create()
     {
+        if (!User.Identity.IsAuthenticated)
+        {
+            return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+        }
         return View(new TodoListWebApiModel { Tasks = new List<TodoTaskDto> { new TodoTaskDto() } });
     }
 
@@ -93,6 +97,11 @@ public class TodoListController : Controller
         }
         catch (ApiException apiException)
         {
+            if (apiException.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Unauthorized access - redirect to login or handle as needed
+                return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+            }
             ModelState.AddModelError("", apiException.Message);
             return View(model);
         }

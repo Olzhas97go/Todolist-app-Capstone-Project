@@ -129,58 +129,15 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
-        public async Task<string> GenerateToken(ClaimsPrincipal principal)
-        {
-            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier); // Get the user's ID
-            var userName = principal.Identity?.Name; // Get the user's username
-            var email = principal.FindFirstValue(ClaimTypes.Email); // Get the user's email
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Email, email) // Include the email claim
-            };
-
-            // Ensure the key is available in configuration.
-            var tokenSigningKey = _configuration["Jwt:TokenSigningKey"];
-            if (string.IsNullOrEmpty(tokenSigningKey))
-            {
-                throw new InvalidOperationException("JWT TokenSigningKey is not found in the configuration.");
-            }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddDays(7);
-
-            // Move the following code here (after initializing claims):
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Identity.Application"));
-
-            var jwtToken = await _jwtProvider.GenerateToken(claimsPrincipal);
-            // ... rest of the code is fine...
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-
-                user.FirstName = Input.FirstName; // Assign properties from InputModel
+                user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -191,19 +148,28 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        new Claim(ClaimTypes.NameIdentifier, user.Id),
-                        new Claim(ClaimTypes.Name, user.UserName),
-                    }, "Identity.Application"));
-
-                    var jwtToken = await _jwtProvider.GenerateToken(claimsPrincipal);
-
-                    await HttpContext.RequestServices
-                        .GetRequiredService<JwtTokenMiddleware>()
-                        .InvokeAsync(HttpContext);
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
                 }
-
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);

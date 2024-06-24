@@ -74,6 +74,7 @@ builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<ITodoListWebApiService, TodoListWebApiService>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddScoped<JwtConfiguration>();
 builder.Services.AddScoped<IUserManager, UserManagementService>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
