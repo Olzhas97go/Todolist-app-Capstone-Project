@@ -46,7 +46,8 @@ public class JwtProvider : IJwtProvider, IJwtTokenGenerator
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Email, email)
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, "Owner")
             // Add other relevant claims here if needed
         };
 

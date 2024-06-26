@@ -21,4 +21,5 @@ public class TodoTask
 
     public bool IsOverdue { get; set; } // For US10
     public ToDoTaskStatus Status { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }

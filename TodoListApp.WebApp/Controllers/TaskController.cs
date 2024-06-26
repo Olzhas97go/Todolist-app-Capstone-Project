@@ -1,20 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Refit;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
+using TodoListApp.WebApi.Models.Models;
 using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Models;
-using AppTask = TodoListApp.WebApp.Models.Task;
-using Task = Microsoft.Build.Utilities.Task;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using TodoListApp.WebApi.Models.Models;
-using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApp.Models.TaskModels;
+using AppTask = TodoListApp.WebApp.Models.TaskModels.Task;
 
 namespace TodoListApp.WebApp.Controllers;
 
@@ -43,27 +42,35 @@ public class TaskController : Controller
                 return NotFound("Todo list not found.");
             }
 
-            var tasks = await _todoListApi.GetTasksForTodoListAsync(todoListId); // Separate call to get tasks
+            var tasks = await _todoListApi.GetTasksForTodoListAsync(todoListId); // Gets a list of TodoTask objects
+
+            var todoListModels = tasks.Select(t => new TodoListModel
+            {
+                Id = t.Id,
+                Name = t.Title,    // Map Title to Name
+                IsCompleted = t.IsCompleted, // Add IsCompleted property to TodoListModel
+                IsOverdue = t.DueDate < DateTime.Now  // Add IsOverdue property to TodoListModel
+            }).ToList();
 
             var viewModel = new TodoListWithTasksViewModel
             {
-                TodoList = todoList, Tasks = tasks // No mapping needed
+                TodoList = todoList,
+                Tasks = todoListModels // Now uses TodoListModel
             };
 
             return View("ViewTasks", viewModel);
         }
         catch (ApiException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            if (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
-                // Unauthorized access - redirect to login or handle as needed
                 return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
             }
             _logger.LogError(ex, "API error while fetching todo list details.");
-            return View("Error",
-                new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
+
 
     [HttpGet("{taskId}")]
     public async Task<IActionResult> Details(int taskId)
@@ -232,6 +239,158 @@ public class TaskController : Controller
             }
 
             return View(viewModel); // Return the view if there was any error
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int taskId)
+    {
+        try
+        {
+            // 1. Verify Authorization (JWT Token)
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+            {
+                _logger.LogWarning("Missing User ID claim in JWT token.");
+                return Unauthorized("Unauthorized access.");
+            }
+
+            // 2. Verify Ownership (Implement in your service layer)
+            var task = await _todoListApi.GetTaskByIdAsync(taskId);
+            if (task == null)
+            {
+                return NotFound("Task not found.");
+            }
+
+            var todoListId = task.TodoListId;
+
+            // 3. Delete the Task
+            await _todoListApi.DeleteTask(taskId);
+
+            // 4. Redirect back to the ViewTasks page for the corresponding TodoList
+            return RedirectToAction("ViewTasks", new { todoListId });
+        }
+        catch (ApiException ex)
+        {
+            // Handle API-related exceptions
+            if (ex.StatusCode == HttpStatusCode.Forbidden)
+            {
+                // Unauthorized to delete
+                TempData["ErrorMessage"] = "You do not have permission to delete this task.";
+                return RedirectToAction("AccessDenied", "Error");
+            }
+            else if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                // Task not found
+                TempData["ErrorMessage"] = "Task not found.";
+                return RedirectToAction("Index", "TodoList");
+            }
+            else
+            {
+                // General error
+                _logger.LogError(ex, "An error occurred while deleting the task.");
+                TempData["ErrorMessage"] = "An error occurred while deleting the task.";
+                return RedirectToAction("Index", "TodoList");
+            }
+        }
+    }
+
+    [HttpGet("{taskId}/edit")]
+    public async Task<IActionResult> EditTask(int taskId)
+    {
+        try
+        {
+            var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
+            if (taskDto == null)
+            {
+                return NotFound("Task not found.");
+            }
+
+            var taskViewModel = _mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(taskDto);
+            return View(taskViewModel); // Pass the correct view model type
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, message: "API error fetching task details.");
+            return StatusCode((int)ex.StatusCode);
+        }
+    }
+
+// Update the EditTask Post Method
+    [HttpPost("{taskId}/edit")]
+    public async Task<IActionResult> EditTask(int taskId, TodoListApp.WebApp.Models.TaskModels.Task updatedTask)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(updatedTask); // Redisplay form with validation errors
+        }
+
+        try
+        {
+            var todoTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
+            todoTaskDto.TodoListId = taskId;
+            var updatedDto = await _todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
+            if(updatedDto is null)
+            {
+                return this.NotFound();
+            }
+
+            return RedirectToAction("Details", "Task", new { taskId = updatedTask.Id });
+        }
+        catch (ApiException ex)
+        {
+            // Handle API exceptions (401 Unauthorized, 404 Not Found, others)
+            if (ex.StatusCode == HttpStatusCode.Forbidden)
+            {
+                TempData["ErrorMessage"] = "You do not have permission to edit this task.";
+                return RedirectToAction("AccessDenied", "Error");
+            }
+            else
+            {
+                _logger.LogError(ex, "API error while updating task: {StatusCode} - {Message}", ex.StatusCode, ex.Message);
+                ModelState.AddModelError("", "An error occurred while updating the task. Please try again later.");
+
+                return View(updatedTask); // Return the same view model type as in HttpGet
+            }
+        }
+    }
+
+    // In TaskController.cs
+    [HttpGet("MyTasks")]
+    public async Task<IActionResult> MyTasks(ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Invalid token: Missing User ID claim.");
+            }
+            string userId = userIdClaim.Value;
+
+            // Fetch tasks using Refit
+            var tasks = await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder);
+
+            var taskListModels = _mapper.Map<List<TodoListModel>>(tasks);
+
+
+            var viewModel = new TodoListWithTasksViewModel
+            {
+                UserId = userId,
+                Tasks = taskListModels, // Use the manually mapped list
+                StatusFilter = status,
+                SortBy = sortBy,
+                SortOrder = sortOrder
+            };
+
+            return View(viewModel);
+        }
+        catch (ApiException ex)
+        {
+            // Handle API errors (e.g., not found, unauthorized, etc.)
+            _logger.LogError(ex, "API Error while fetching tasks.");
+            return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Framework;
+using TodoListApp.WebApi.Models;
 
-namespace TodoListApp.WebApp.Models;
+namespace TodoListApp.WebApp.Models.TaskModels;
 
 public class Task
 {
@@ -11,6 +12,9 @@ public class Task
     [Required]
     public string Title { get; set; } // Add this property
 
+    public ToDoTaskStatus Status { get; set; } // Add this property
+
+
     public DateTime? DueDate { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -20,4 +24,5 @@ public class Task
     public bool Completed { get; set; } = false;
 
     public bool IsCompleted { get; set; } = false;
+    public int TodoListId { get; set; }
 }

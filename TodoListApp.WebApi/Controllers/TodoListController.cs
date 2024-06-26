@@ -100,6 +100,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "EditTodoListPolicy")]
     public async Task<IActionResult> UpdateTodoList(int id, [FromBody] TodoListDto todoListDto)
     {
         if (id != todoListDto.Id)
@@ -133,24 +134,6 @@ public class TodoListController : ControllerBase
             // Log the exception
             return StatusCode(500, "An error occurred while updating the todo list.");
         }
-    }
-
-
-
-
-    [HttpGet("GetMyTodoLists")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public IActionResult GetMyTodoLists([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-        {
-            return Unauthorized("Invalid token: Missing User ID claim.");
-        }
-
-        string userId = userIdClaim.Value;
-        var tasks = _service.GetTasksForUser(userId, status, sortBy, sortOrder); // Pass sortBy and sortOrder
-        return Ok(tasks);
     }
 
     [HttpGet("{id}")]

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -83,8 +84,8 @@ public class TaskController : ControllerBase
     }
 
 
-    [HttpGet("{taskId}")]  // GET /api/tasks/{taskId}
-    public async Task<ActionResult<TodoTask>> GetTaskById(int taskId)
+    [HttpGet("{taskId}")]
+    public async Task<ActionResult<TodoTaskDto>> GetTaskById(int taskId)
     {
         try
         {
@@ -93,7 +94,10 @@ public class TaskController : ControllerBase
             {
                 return NotFound(); // Task not found
             }
-            return Ok(task);
+            var taskDto = _mapper.Map<TodoTaskDto>(task);
+            taskDto.IsOverdue = task.IsOverdue;  // Map the calculated IsOverdue property
+
+            return Ok(taskDto);
         }
         catch (Exception ex)
         {
@@ -102,9 +106,10 @@ public class TaskController : ControllerBase
         }
     }
 
+
     // TaskController.cs
     [HttpPut("{taskId}")]  // PUT /api/tasks/{taskId}
-    public async Task<ActionResult<TodoTask>> UpdateTask(int taskId, [FromBody] TodoTask updatedTodoTask)
+    public async Task<ActionResult<TodoTaskDto>> UpdateTask(int taskId, [FromBody] TodoTask updatedTodoTask)
     {
         if (taskId != updatedTodoTask.Id)
         {
@@ -113,6 +118,7 @@ public class TaskController : ControllerBase
 
         try
         {
+            var todoTask = _mapper.Map<TodoTask>(updatedTodoTask);
             var updated = await _taskService.UpdateTaskAsync(taskId, updatedTodoTask);
             if (updated == null)
             {
@@ -164,5 +170,42 @@ public class TaskController : ControllerBase
         }
 
         return Ok(updatedTask);
+    }
+
+    [HttpGet("GetMyTasks")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public IActionResult GetMyTasks([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            return Unauthorized("Invalid token: Missing User ID claim.");
+        }
+
+        var userId = userIdClaim.Value; // Remove the duplicate declaration of 'string userId'
+
+        var tasks = _context.Tasks.Where(t => t.UserId == userId).ToList();
+
+        if (status.HasValue)
+        {
+            tasks = tasks.Where(t => t.Status == status).ToList();
+        }
+
+        // Apply sorting
+        switch (sortBy.ToLower())
+        {
+            case "name":
+                tasks = sortOrder == "desc" ? tasks.OrderByDescending(t => t.Title).ToList() : tasks.OrderBy(t => t.Title).ToList();
+                break;
+            case "duedate":
+                tasks = sortOrder == "desc" ? tasks.OrderByDescending(t => t.DueDate).ToList() : tasks.OrderBy(t => t.DueDate).ToList();
+                break;
+            default:
+                // Default sorting (by Name ascending)
+                tasks = tasks.OrderBy(t => t.Title).ToList();
+                break;
+        }
+
+        return Ok(tasks);
     }
 }

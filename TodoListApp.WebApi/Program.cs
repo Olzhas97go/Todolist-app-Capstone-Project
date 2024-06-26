@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy  =>
         {
-            policy.WithOrigins("http://localhost:4200") // Add your MVC app's origin here
+            policy.WithOrigins("https://localhost:7171") // Add your MVC app's origin here
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });

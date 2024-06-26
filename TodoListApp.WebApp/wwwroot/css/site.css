@@ -15,6 +15,7 @@ html {
 html {
     position: relative;
     min-height: 100%;
+    font-family: 'Roboto', sans-serif;
 }
 
 body {
@@ -50,3 +51,66 @@ body {
 .login-logout-card .card-body {
     padding: 10px 20px;
 }
+
+/* styles.css */
+.list-group-item-danger {
+    background-color: #ffe6e6; /* Light red background */
+    border-color: #ffcdd2;
+    color: #842029; /* Dark red color for text */
+    font-weight: bold; /* Make the text bold */
+}
+
+.list-group-item-danger .form-check-label {
+    text-decoration: line-through; /* Add line-through to task title */
+}
+
+.list-group-item-danger .text-danger {
+    font-weight: normal; /* Make the overdue text normal weight */
+}
+.card {
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+    background-color: #007bff;
+    color: white;
+    border-bottom: 1px solid #ccc;
+}
+.card-header h2 {
+    font-size: 1.5rem;
+}
+.card-body {
+    padding: 1.5rem;
+}
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.btn {
+    margin-left: 5px;
+}
+.btn-group > form > .btn {
+    margin: 0; /* Remove all margins from the button inside the form */
+}
+.form-group label {
+    font-weight: bold;
+}
+
+.form-control {
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #f8f9fa; /* Light gray background for active tab */
+    border-bottom: 2px solid #007bff; /* Blue border at bottom of active tab */
+    color: #007bff; /* Blue text for active tab */
+    font-weight: bold;
+}
+
+.login-logout-card .card-header {
+    background-color: transparent; /* Remove the default blue background */
+    /* Remove the default bottom border */
+}
+

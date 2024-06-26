@@ -1,27 +1,37 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model TodoListApp.WebApp.Models.TaskModels.CreateTaskViewModel
 
-<h2>Create Task for @Model.TodoListName</h2>
-
-<form method="post" asp-action="CreateTask" asp-route-id="@Model.TodoListId">
-    <div>
-        <label asp-for="Title" class="control-label"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+<div class="card">
+    <div class="card-header">
+        <h2>Create Task for @Model.TodoListName</h2>
     </div>
+    <div class="card-body">
+        <form method="post" asp-action="CreateTask" asp-route-id="@Model.TodoListId">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div>
-        <label asp-for="DueDate" class="control-label"></label>
-        <input asp-for="DueDate" class="form-control" />
-        <span asp-validation-for="DueDate" class="text-danger"></span>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="DueDate" class="control-label"></label>
+                <input asp-for="DueDate" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+
+            <!-- New Field -->
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@Model.TodoListId" class="btn btn-secondary ml-2">Back to Tasks</a>
+            </div>
+        </form>
     </div>
-
-    <!-- New Field -->
-    <div>
-        <label asp-for="Description" class="control-label"></label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+</div>

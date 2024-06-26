@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using TodoListApp.WebApi.Models
+@model TodoListApp.WebApp.Models.TaskModels.Task
+
+<div class="card">
+    <div class="card-header">
+        <h2>Edit Task</h2>
+    </div>
+    <div class="card-body">
+        <form asp-action="EditTask" asp-controller="Task" method="post">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" class="form-control" id="title" name="Title" value="@Model.Title" required />
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" id="description" name="Description" rows="3">@Model.Description</textarea>
+            </div>
+            <div class="form-group">
+                <label asp-for="DueDate"></label>
+                <input asp-for="DueDate" class="form-control" type="date" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status"></label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ToDoTaskStatus>()" class="form-control"></select>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" asp-for="IsCompleted" class="form-check-input" />
+                <label asp-for="IsCompleted" class="form-check-label">Is Completed</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save <Changes></Changes></button>
+            <a asp-action="Index" asp-controller="TodoList" class="btn btn-secondary">Back to Lists</a>
+        </form>
+    </div>
+</div>

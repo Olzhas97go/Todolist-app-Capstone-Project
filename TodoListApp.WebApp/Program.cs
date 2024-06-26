@@ -54,12 +54,6 @@ builder.Services.AddAuthentication()
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:TokenSigningKey"]))
         };
     });
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("CreateTodoListPolicy", policy =>
-        policy.RequireAuthenticatedUser() // User must be logged in
-            .RequireClaim(ClaimTypes.Role, "Admin")); // User must have the "Admin" role
-});
 builder.Services.AddDistributedMemoryCache(); // Use in-memory cache for session (simplest option)
 builder.Services.AddSession(options =>
 {

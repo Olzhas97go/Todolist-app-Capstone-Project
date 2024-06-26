@@ -181,7 +181,17 @@ public class TodoListController : Controller
         }
         catch (ApiException ex)
         {
-            ModelState.AddModelError("", ex.Message);
+            if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                // Specific handling for 403 Forbidden (Access Denied)
+                _logger.LogWarning("Forbidden access while updating to-do list (ID: {TodoListId})", id);
+                TempData["ErrorMessage"] = "You do not have permission to edit this to-do list."; // Set a TempData message
+                return RedirectToAction("AccessDenied", "Error"); // Redirect to your AccessDenied action/view
+            }
+
+            // Handle other API exceptions (e.g., 500 Internal Server Error)
+            _logger.LogError(ex, "An error occurred while updating the to-do list (ID: {TodoListId})", id);
+            ModelState.AddModelError("", "An error occurred while updating the to-do list. Please try again later.");
             return View(model);
         }
     }

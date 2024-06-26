@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 using TodoListApp.WebApi.Controllers;
 using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
+using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Profiles;
 using TodoListApp.WebApi.Services;
 
@@ -54,6 +56,11 @@ public static class ServiceExtensions
                     },
                 };
             });
+        services.AddAuthorization(options => // Add this section
+        {
+            options.AddPolicy("EditTodoListPolicy", policy =>
+                policy.RequireClaim(ClaimTypes.Role, UserRoles.Owner.ToString(), UserRoles.Editor.ToString()));
+        });
     }
 
     public static void ConfigureSwagger(this IServiceCollection services)
