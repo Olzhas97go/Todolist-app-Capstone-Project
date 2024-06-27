@@ -13,4 +13,5 @@ public class TodoListWebApiModel
     public string? Description { get; set; }
     [Required(ErrorMessage = "The Tasks field is required.")]
     public List<TodoTaskDto> Tasks { get; set; } = new();
+    public string UserId { get; set; } = string.Empty;
 }

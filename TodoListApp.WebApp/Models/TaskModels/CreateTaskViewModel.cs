@@ -23,6 +23,7 @@ namespace TodoListApp.WebApp.Models.TaskModels
         [DataType(DataType.Date)]
         public DateTime DueDate { get; set; }
         public TodoListDetailsDto TodoList { get; set; }
+        public string UserId { get; set; } = string.Empty; // Change the type to string
     }
 }
 

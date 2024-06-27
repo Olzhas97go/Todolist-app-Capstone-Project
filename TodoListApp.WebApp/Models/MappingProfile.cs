@@ -38,10 +38,11 @@ public class MappingProfile : Profile
         // Map TodoListDto to TodoListWebApiModel
         CreateMap<TodoListDetailsDto, TodoListWebApiModel>()
             .ForMember(dest => dest.Tasks, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ReverseMap();
 
         CreateMap<TodoListWebApiModel, TodoListDto>()
-            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.Status, opt => opt.Ignore());
 
         CreateMap<TaskEntity, TodoTask>()

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -76,23 +77,38 @@ public class TodoListController : Controller
         {
             return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
         }
-        return View(new TodoListWebApiModel { Tasks = new List<TodoTaskDto> { new TodoTaskDto() } });
+
+        var model = new TodoListWebApiModel
+        {
+            Tasks = new List<TodoTaskDto> { new TodoTaskDto() },
+        };
+
+        return View(model);
     }
+
+
 
 
 
     [HttpPost("Create")]
     public async Task<IActionResult> Create(TodoListWebApiModel model)
     {
+        // Set UserId for each task
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get user ID
+        foreach (var task in model.Tasks)
+        {
+            task.UserId = userId;
+        }
+
         if (!ModelState.IsValid)
         {
-            return View(model); // Return to the view with validation errors
+            return View(model);
         }
 
         try
         {
             var todoListDto = _mapper.Map<TodoListDto>(model);
-            await _todoListApi.CreateTodoList(todoListDto); // Call Refit API method
+            await _todoListApi.CreateTodoList(todoListDto);
             return RedirectToAction("Index");
         }
         catch (ApiException apiException)

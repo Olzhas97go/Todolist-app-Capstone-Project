@@ -16,7 +16,7 @@ public class WebApiMappingProfile : Profile
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => ToDoTaskStatus.InProgress))
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => 1))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.Tasks, opt => opt.MapFrom(src => src.Tasks));
 
         CreateMap<TodoListEntity, TodoListModel>()

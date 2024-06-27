@@ -25,4 +25,5 @@ public class Task
 
     public bool IsCompleted { get; set; } = false;
     public int TodoListId { get; set; }
+    public string UserId { get; set; } = string.Empty; // Change the type to string
 }

@@ -330,6 +330,7 @@ public class TaskController : Controller
         {
             var todoTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
             todoTaskDto.TodoListId = taskId;
+            todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
             var updatedDto = await _todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
             if(updatedDto is null)
             {
@@ -337,6 +338,7 @@ public class TaskController : Controller
             }
 
             return RedirectToAction("Details", "Task", new { taskId = updatedTask.Id });
+
         }
         catch (ApiException ex)
         {

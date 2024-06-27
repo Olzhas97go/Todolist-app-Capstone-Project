@@ -15,4 +15,5 @@ public class TodoTaskDto
     public DateTime? DueDate { get; set; }
     public int TodoListId { get; set; }
     public bool IsOverdue { get; set; }
+    public string  UserId { get; set; } // Make sure this is included
 }
