@@ -25,13 +25,13 @@ public class MappingProfile : Profile
         CreateMap<TodoTaskDto, TodoTask>()
             .ForMember(dest => dest.TodoListId, opt => opt.MapFrom(src => src.TodoListId))
             .ForMember(dest => dest.IsOverdue, opt => opt.Ignore())
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (ToDoTaskStatus)src.Status))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
             .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
 
         CreateMap<Task, TodoTaskDto>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (ToDoTaskStatus)src.Status)) // Cast to enum
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))// Cast to int
             .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.CompletedAt > src.CreatedDate));
 
@@ -87,8 +87,5 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.DueDate < DateTime.Now))
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId)); // Add this line
 
-        CreateMap<TodoTaskDto, TodoListModel>()
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Title))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
     }
 }

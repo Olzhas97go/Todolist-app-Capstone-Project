@@ -21,4 +21,5 @@ public interface ITaskService
     Task<TodoTask> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus);
 
     List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc");
+    Task<IEnumerable<TodoTask>> SearchByTitleAsync(string title);
 }

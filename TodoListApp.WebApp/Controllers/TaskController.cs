@@ -330,9 +330,9 @@ public class TaskController : Controller
         try
         {
             var todoTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
-            todoTaskDto.TodoListId = 20;
-            //todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
-            todoTaskDto.UserId = "a4cc3e1f-077b-4fd6-add4-13ede58c1c8a";
+            todoTaskDto.TodoListId = taskId;
+            todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
+            //todoTaskDto.UserId = "a4cc3e1f-077b-4fd6-add4-13ede58c1c8a";
             //todoTaskDto.Status = ToDoTaskStatus.Completed;
             var updatedDto = await _todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
             if(updatedDto is null)
@@ -363,7 +363,7 @@ public class TaskController : Controller
 
     // In TaskController.cs
     [HttpGet("MyTasks")]
-    public async Task<IActionResult> MyTasks(ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")
+    public async Task<IActionResult> MyTasks(string searchString = "", string status = null, string sortBy = "Name", string sortOrder = "asc")
     {
         try
         {
@@ -373,31 +373,89 @@ public class TaskController : Controller
                 return Unauthorized("Invalid token: Missing User ID claim.");
             }
             string userId = userIdClaim.Value;
+            IEnumerable<TodoTask> tasks; // Change the type to TodoTask
 
-            // Fetch tasks using Refit
-            var tasks = await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder);
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                //var searchedTasks = (await _todoListApi.Search(searchString)).Where(t => t.UserId == userId); // Filter for user's tasks
+                var searchedTasks = await _todoListApi.Search(searchString); // Filter for user's tasks
+                tasks = _mapper.Map<IEnumerable<TodoTask>>(searchedTasks); // Map to TodoTask
+            }
+            else
+            {
+                tasks = _mapper.Map<IEnumerable<TodoTask>>(await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder)); // Map to TodoTask
+            }
 
             var taskListModels = _mapper.Map<List<TodoListModel>>(tasks);
-
 
             var viewModel = new TodoListWithTasksViewModel
             {
                 UserId = userId,
-                Tasks = taskListModels, // Use the manually mapped list
-                StatusFilter = status,
+                Tasks = taskListModels,
+                StatusFilter = status != null ? Enum.Parse<ToDoTaskStatus>(status) : null,
                 SortBy = sortBy,
-                SortOrder = sortOrder
+                SortOrder = sortOrder,
+                SearchString = searchString
             };
 
             return View(viewModel);
         }
         catch (ApiException ex)
         {
+            if (ex.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var validationErrors = await ex.GetContentAsAsync<ValidationProblemDetails>();
+                foreach (var error in validationErrors.Errors)
+                {
+                    ModelState.AddModelError(error.Key, error.Value.First()); // Add error to ModelState
+                }
+                return View("MyTasks"); // Return the view with validation errors
+            }
             // Handle API errors (e.g., not found, unauthorized, etc.)
             _logger.LogError(ex, "API Error while fetching tasks.");
             return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
+
+
+    // In your TaskController (WebApp)
+    public async Task<IActionResult> Search(string searchString)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Invalid token: Missing User ID claim.");
+            }
+
+            string userId = userIdClaim.Value;
+
+            // Fetch tasks from the API search endpoint
+            var taskDtos = await _todoListApi.Search(searchString);
+
+            // Filter tasks by userId to only show tasks for the current user
+            var filteredTasks = taskDtos.Where(t => t.UserId == userId);
+
+            // Map to the view model
+            var taskListModels = _mapper.Map<List<TodoListModel>>(filteredTasks);
+
+            var viewModel = new TodoListWithTasksViewModel
+            {
+                UserId = userId,
+                Tasks = taskListModels,
+                SearchString = searchString // Pass the search string back to the view
+            };
+
+            return View("MyTasks", viewModel); // Reuse the MyTasks view
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, "API Error while fetching tasks.");
+            return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
+        }
+    }
+
 
     [HttpPost("{todoListId}/{taskId}/change-status")]
     public async Task<IActionResult> ChangeTaskStatus(int todoListId, int taskId, ToDoTaskStatus newStatus)

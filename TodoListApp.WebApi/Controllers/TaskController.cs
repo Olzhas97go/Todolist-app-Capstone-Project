@@ -245,7 +245,29 @@ public class TaskController : ControllerBase
                 tasks = tasks.OrderBy(t => t.Title).ToList();
                 break;
         }
+        var taskDtos = _mapper.Map<List<TodoTaskDto>>(tasks);
+        return Ok(taskDtos);
+    }
 
-        return Ok(tasks);
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<TodoTaskDto>>> Search([FromQuery] string title)
+    {
+        try
+        {
+            var tasks = await _taskService.SearchByTitleAsync(title);
+            var taskDtos = _mapper.Map<IEnumerable<TodoTaskDto>>(tasks);
+
+            if (!taskDtos.Any())
+            {
+                return NotFound("No tasks found matching the search criteria.");
+            }
+
+            return Ok(taskDtos);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while searching for tasks.");
+            return StatusCode(500, "Internal server error");
+        }
     }
 }

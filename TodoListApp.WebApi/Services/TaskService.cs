@@ -218,4 +218,13 @@ public class TaskService : ITaskService
             .Select(t => new TodoListModel { Id = t.Id, Name = t.Title, Description = t.Description, Status = t.Status })
             .ToList();
     }
+
+    public async Task<IEnumerable<TodoTask>> SearchByTitleAsync(string title)
+    {
+        var tasks = await _context.Tasks
+            .Where(t => EF.Functions.Like(t.Title, $"%{title}%"))
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<TodoTask>>(tasks);
+    }
 }
