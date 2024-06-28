@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using TodoListApp.WebApi.Models;
 using TodoListApp.WebApp.Areas.Identity.Data;
 using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Services;
@@ -139,7 +140,29 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
                 var user = CreateUser();
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
+                string role = null;
+                switch (Input.Email.ToLower())
+                {
+                    case "owner@gmail.com":
+                        role = UserRoles.Owner.ToString();
+                        break;
+                    case "editor@gmail.com":
+                        role = UserRoles.Editor.ToString();
+                        break;
+                    case "viewer@gmail.com":
+                        role = UserRoles.Viewer.ToString();
+                        break;
+                }
 
+                if (role != null)
+                {
+                    user.Role = Enum.Parse<UserRoles>(role);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Unrecognized email address. Cannot assign a role.");
+                    return Page();
+                }
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);

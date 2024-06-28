@@ -1,9 +1,38 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@using TodoListApp.WebApp.Areas.Identity.Data
+@inject UserManager<ApplicationUser> userManager
+@{
+    var user = await userManager.GetUserAsync(User);
+}
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <p>User Id: @ViewData["UserID"]</p>
+<div class="text-center hero-section">
+    <h1 class="display-4 mb-4">Welcome to Your TodoList, @user.FirstName!</h1>
+    <p class="lead">Organize your life, one task at a time.</p>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Your User ID
+                </div>
+                <div class="card-body">
+                    <p>@ViewData["UserID"]</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Get Started
+                </div>
+                <div class="card-body">
+                    <a asp-controller="TodoList" asp-action="Index" class="btn btn-primary">View Your Lists</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

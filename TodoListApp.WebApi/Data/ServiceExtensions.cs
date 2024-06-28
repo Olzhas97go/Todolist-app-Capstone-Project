@@ -58,8 +58,9 @@ public static class ServiceExtensions
             });
         services.AddAuthorization(options => // Add this section
         {
-            options.AddPolicy("EditTodoListPolicy", policy =>
-                policy.RequireClaim(ClaimTypes.Role, UserRoles.Owner.ToString(), UserRoles.Editor.ToString()));
+            options.AddPolicy("OwnerPolicy", policy => policy.RequireRole(UserRoles.Owner.ToString()));
+            options.AddPolicy("EditorPolicy", policy => policy.RequireRole(UserRoles.Editor.ToString()));
+            options.AddPolicy("ViewerPolicy", policy => policy.RequireRole(UserRoles.Viewer.ToString()));
         });
     }
 

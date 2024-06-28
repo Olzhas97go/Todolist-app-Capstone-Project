@@ -11,5 +11,5 @@ public class TaskDetailsViewModel
     public TodoTask SelectedTask { get; set; }
 
     public TodoListDetailsDto TodoListDetails { get; set; }
-
+    public List<TodoTaskDto> AllTasks { get; set; }
 }

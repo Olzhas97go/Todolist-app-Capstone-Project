@@ -13,18 +13,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		user-stories.md = user-stories.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApi", "TodoListApp.WebApi\TodoListApp.WebApi.csproj", "{E24E0797-13A8-4635-9958-57CC7CA126A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoListApp.WebApi", "TodoListApp.WebApi\TodoListApp.WebApi.csproj", "{E24E0797-13A8-4635-9958-57CC7CA126A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApi.Models", "TodoListApp.WebApi.Models\TodoListApp.WebApi.Models.csproj", "{E2938F80-379F-4CE3-AFB6-7870A657610E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoListApp.WebApi.Models", "TodoListApp.WebApi.Models\TodoListApp.WebApi.Models.csproj", "{E2938F80-379F-4CE3-AFB6-7870A657610E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp.WebApp", "TodoListApp.WebApp\TodoListApp.WebApp.csproj", "{D88668D1-86BC-424D-8FF9-0DBFFEE26C1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoListApp.WebApp", "TodoListApp.WebApp\TodoListApp.WebApp.csproj", "{D88668D1-86BC-424D-8FF9-0DBFFEE26C1D}"
 EndProject
 Global
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {71075FF6-34FF-4DFB-BBA7-7654CC357608}
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E24E0797-13A8-4635-9958-57CC7CA126A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -40,8 +38,10 @@ Global
 		{D88668D1-86BC-424D-8FF9-0DBFFEE26C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D88668D1-86BC-424D-8FF9-0DBFFEE26C1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71075FF6-34FF-4DFB-BBA7-7654CC357608}
 	EndGlobalSection
 EndGlobal

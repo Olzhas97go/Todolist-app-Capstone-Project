@@ -184,6 +184,16 @@ public class TodoListController : Controller
     [HttpPost("Edit/{id}")]
     public async Task<IActionResult> Edit(int id, TodoListWebApiModel model)
     {
+        var roleClaim = User.FindFirst(ClaimTypes.Role);
+        if (roleClaim != null)
+        {
+            var userRole = roleClaim.Value;
+            _logger.LogInformation("User role: {UserRole}", userRole);
+        }
+        else
+        {
+            _logger.LogWarning("User role claim not found");
+        }
         if (!ModelState.IsValid)
         {
             return View(model);

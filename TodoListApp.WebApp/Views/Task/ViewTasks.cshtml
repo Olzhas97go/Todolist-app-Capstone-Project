@@ -15,13 +15,15 @@
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center @(task.IsOverdue ? "list-group-item-danger" : "")">
                         <div>
-                            <span class="form-check-label" style="@(task.Status == ToDoTaskStatus.Completed ? "text-decoration: line-through;" : "")">
-                                @task.Name
-                            </span>
+                            <span class="form-check-label" style="@(task.IsCompleted && !task.IsOverdue ? "text-decoration: line-through;" : "")">
+    @task.Name
+</span>
+
                             @if (task.IsOverdue)
                             {
-                                <span class="text-danger ml-2">[overdue]</span>
+                            <span class="text-danger ml-2">[overdue]</span>
                             }
+
                         </div>
                         <div class="d-flex justify-content-end">
                             <a asp-action="Details" asp-controller="Task" class="btn btn-sm btn-info"
@@ -48,7 +50,7 @@
         }
 
         <div class="d-flex justify-content-between align-items-center mt-3">
-            <a asp-action="CreateTask" asp-controller="Task" asp-route-todoListId="@Model.TodoList.Id" class="btn btn-success">Create Task</a>
+            <a asp-action="CreateTask" asp-controller="Task" asp-route-todoListId="@Model.TodoList.Id" class="btn btn-success mt-3">Create Task</a>
             <a asp-action="Index" asp-controller="TodoList" class="btn btn-secondary">Back to Lists</a>
         </div>
 

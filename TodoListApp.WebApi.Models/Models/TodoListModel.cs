@@ -16,4 +16,5 @@ public class TodoListModel
     public DateTime? DueDate { get; set; }
     public bool IsOverdue { get; set; }
     public bool IsCompleted { get; set; }
+    public int TodoListId { get; set; }
 }

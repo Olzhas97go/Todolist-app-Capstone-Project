@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using TodoListApp.WebApp.Interfaces;
@@ -83,8 +84,9 @@ public class ApiHeaderService : IApiHeaderService
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = _configuration["JwtOptions:ValidIssuer"],
-            ValidAudience = _configuration["JwtOptions:ValidAudience"],
+            ValidIssuer = validIssuer,
+            ValidAudience = validAudience,
+            RoleClaimType = ClaimTypes.Role,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Keys:TokenSigningKey"]))
         };
     }

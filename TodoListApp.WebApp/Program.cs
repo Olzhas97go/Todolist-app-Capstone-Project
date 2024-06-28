@@ -70,7 +70,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddScoped<JwtConfiguration>();
-builder.Services.AddScoped<IUserManager, UserManagementService>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtProvider>();
 builder.Services.AddScoped<IApiHeaderService, ApiHeaderService>();
@@ -80,7 +79,7 @@ builder.Services.AddRefitClient<ITodoListApi>()
     .ConfigureHttpClient(c =>
     {
         c.BaseAddress = new Uri(builder.Configuration["ApiSettings:TodoListApiBaseUrl"]);
-        c.Timeout = TimeSpan.FromSeconds(10); // Example of a custom timeout
+        c.Timeout = TimeSpan.FromSeconds(30); // Example of a custom timeout
     })
     .AddHttpMessageHandler<TokenDelegatingHandler>();
 builder.Services.AddRazorPages();

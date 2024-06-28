@@ -32,6 +32,7 @@ public class TaskController : ControllerBase
 
 
     [HttpGet("{todoListId}/tasks")]
+    [Authorize(Roles = "Owner,Editor,Viewer")]
     public async Task<ActionResult<List<TodoTask>>> GetTasks(int todoListId)
     {
         var tasks = await _taskService.GetTasksForTodoListAsync(todoListId);
@@ -39,7 +40,7 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost("{todoListId}/tasks")] // POST /api/tasks/{todoListId}/tasks
-    [Authorize]
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult<TodoTask>> AddTask(int todoListId, [FromBody] TodoTask newTodoTask)
     {
         try
@@ -85,6 +86,7 @@ public class TaskController : ControllerBase
 
 
     [HttpGet("{taskId}")]
+    [Authorize(Roles = "Owner,Editor,Viewer")]
     public async Task<ActionResult<TodoTaskDto>> GetTaskById(int taskId)
     {
         try
@@ -92,10 +94,29 @@ public class TaskController : ControllerBase
             var task = await _taskService.GetTaskByIdAsync(taskId);
             if (task == null)
             {
-                return NotFound(); // Task not found
+                return NotFound("Task not found.");
             }
+
             var taskDto = _mapper.Map<TodoTaskDto>(task);
-            taskDto.IsOverdue = task.IsOverdue;  // Map the calculated IsOverdue property
+            taskDto.IsOverdue = task.IsOverdue;
+
+            if (User != null) // Check if User is not null
+            {
+                var userTimeZoneId = User.FindFirstValue("TimeZone") ?? "UTC";
+                var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
+
+                try
+                {
+                    taskDto.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(taskDto.CreatedDate, userTimeZone);
+                    taskDto.DueDate = taskDto.DueDate.HasValue
+                        ? TimeZoneInfo.ConvertTimeFromUtc(taskDto.DueDate.Value, userTimeZone)
+                        : null;
+                }
+                catch (TimeZoneNotFoundException ex)
+                {
+                    _logger.LogWarning(ex, "User's timezone not found, defaulting to UTC.");
+                }
+            }
 
             return Ok(taskDto);
         }
@@ -108,7 +129,8 @@ public class TaskController : ControllerBase
 
 
     // TaskController.cs
-    [HttpPut("{taskId}")]  // PUT /api/tasks/{taskId}
+    [HttpPut("{taskId}")] // PUT /api/tasks/{taskId}
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult<TodoTaskDto>> UpdateTask(int taskId, [FromBody] TodoTask updatedTodoTask)
     {
         if (taskId != updatedTodoTask.Id)
@@ -118,7 +140,7 @@ public class TaskController : ControllerBase
 
         try
         {
-            var todoTask = _mapper.Map<TodoTask>(updatedTodoTask);
+           // var todoTask = _mapper.Map<TodoTask>(updatedTodoTask);
             var updated = await _taskService.UpdateTaskAsync(taskId, updatedTodoTask);
             if (updated == null)
             {
@@ -139,6 +161,7 @@ public class TaskController : ControllerBase
     }
 
     [HttpDelete("{taskId}")]
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<IActionResult> DeleteTask(int taskId)
     {
         try
@@ -158,22 +181,39 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpPut("{todoListId}/{taskId}/status")] // PUT /api/Task/{todoListId}/{taskId}/status
-    [Authorize]
-    public async Task<IActionResult> UpdateTaskStatus(int todoListId, int taskId, ToDoTaskStatus newStatus)
+    // In your Web API TaskController
+    [HttpPut("{taskId}/status")]
+    [Authorize(Roles = "Owner,Editor")]
+    public async Task<IActionResult> UpdateTaskStatus(int taskId, [FromBody] UpdateTaskStatusRequest request)
     {
-        var updatedTask = await _taskService.UpdateTaskStatusAsync(todoListId, taskId, newStatus);
-
-        if (updatedTask == null)
+        // Validate the request
+        if (!ModelState.IsValid)
         {
-            return NotFound("Task not found.");
+            return BadRequest(ModelState);
         }
+        try
+        {
+            // Update the task status using your _taskService
+            var updatedTask = await _taskService.UpdateTaskStatusAsync(request.TodoListId, taskId, request.NewStatus);
+            if (updatedTask == null)
+            {
+                return NotFound();
+            }
 
-        return Ok(updatedTask);
+            var updatedTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
+            return Ok(updatedTaskDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while updating task status.");
+            return StatusCode(500, "Internal server error");
+        }
     }
 
+
+
     [HttpGet("GetMyTasks")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public IActionResult GetMyTasks([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

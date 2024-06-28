@@ -5,7 +5,7 @@ using TodoListApp.WebApp.Interfaces;
 
 namespace TodoListApp.WebApp.Services;
 
-public class UserManagementService : IUserManager
+public class UserManagementService
 {
     private readonly UserManager<ApplicationUser> _userManager;
 

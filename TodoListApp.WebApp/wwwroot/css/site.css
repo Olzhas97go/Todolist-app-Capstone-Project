@@ -61,12 +61,8 @@ body {
 }
 
 .list-group-item-danger .form-check-label {
-    text-decoration: line-through; /* Add line-through to task title */
 }
 
-.list-group-item-danger .text-danger {
-    font-weight: normal; /* Make the overdue text normal weight */
-}
 .card {
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -112,5 +108,16 @@ body {
 .login-logout-card .card-header {
     background-color: transparent; /* Remove the default blue background */
     /* Remove the default bottom border */
+}
+
+/* Hero Section Styling */
+.hero-section {
+    background-color: #f8f9fa; /* Light background color */
+    padding: 3rem 1.5rem;      /* Add padding for visual spacing */
+    border-bottom: 1px solid #dee2e6; /* Add a subtle border */
+}
+
+.hero-section h1 {
+    font-weight: 600;  /* Slightly bolder font */
 }
 

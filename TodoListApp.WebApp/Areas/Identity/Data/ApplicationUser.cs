@@ -5,11 +5,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using TodoListApp.WebApi.Models;
 using TodoListApp.WebApp.Interfaces;
 
 namespace TodoListApp.WebApp.Areas.Identity.Data;
 
-public class ApplicationUser : IdentityUser, IUserManager
+public class ApplicationUser : IdentityUser
 {
     [PersonalData]
     [Column(TypeName = "nvarchar(100)")]
@@ -18,7 +19,7 @@ public class ApplicationUser : IdentityUser, IUserManager
     [PersonalData]
     [Column(TypeName = "nvarchar(100)")]
     public string LastName { get; set; } = null!;
-
+    public UserRoles  Role { get; set; }
     public async Task<string> GetUserId(ClaimsPrincipal user)
     {
         return await Task.FromResult(this.Id); // Or however you retrieve the user ID

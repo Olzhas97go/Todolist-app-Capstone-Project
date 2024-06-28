@@ -13,9 +13,9 @@ public class TaskEntity
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = "No description";
-    public ToDoTaskStatus Status { get; set; } = ToDoTaskStatus.NotStarted;
+    public ToDoTaskStatus Status { get; set; }
 
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     public DateTime? DueDate { get; set; }
 

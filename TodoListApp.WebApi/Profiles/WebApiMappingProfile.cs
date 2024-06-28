@@ -31,7 +31,7 @@ public class WebApiMappingProfile : Profile
         CreateMap<TaskEntity, TodoTaskDto>()
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-            .ForMember(dest => dest.CreatedAt,
+            .ForMember(dest => dest.CreatedDate,
                 opt => opt.MapFrom(src => src.CreatedDate)) // Assuming CreatedDate in TaskEntity
             .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate))
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src => src.IsCompleted));
@@ -47,8 +47,12 @@ public class WebApiMappingProfile : Profile
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.DueDate < DateTime.Now)).ReverseMap()
             .ForMember(dest => dest.TodoList, opt => opt.Ignore())
-            .ForMember(dest => dest.TodoListId, opt => opt.Ignore());
+            .ForMember(dest => dest.TodoListId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate)); // Make sure this is consistent
 
-        CreateMap<TodoTask, TodoTaskDto>();
+
+        CreateMap<TodoTask, TodoTaskDto>()
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
     }
 }

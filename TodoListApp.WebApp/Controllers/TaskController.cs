@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -206,6 +206,7 @@ public class TaskController : Controller
             var newTask = await _todoListApi.AddTask(todoListId, todoTaskDto);
 
             return RedirectToAction("ViewTasks", new { todoListId = viewModel.TodoListId });
+
         }
         catch (Exception ex)
         {
@@ -319,7 +320,7 @@ public class TaskController : Controller
 
 // Update the EditTask Post Method
     [HttpPost("{taskId}/edit")]
-    public async Task<IActionResult> EditTask(int taskId, TodoListApp.WebApp.Models.TaskModels.Task updatedTask)
+    public async Task<IActionResult> EditTask([FromQuery] int taskId, TodoListApp.WebApp.Models.TaskModels.Task updatedTask)
     {
         if (!ModelState.IsValid)
         {
@@ -329,8 +330,10 @@ public class TaskController : Controller
         try
         {
             var todoTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
-            todoTaskDto.TodoListId = taskId;
-            todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
+            todoTaskDto.TodoListId = 20;
+            //todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
+            todoTaskDto.UserId = "a4cc3e1f-077b-4fd6-add4-13ede58c1c8a";
+            //todoTaskDto.Status = ToDoTaskStatus.Completed;
             var updatedDto = await _todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
             if(updatedDto is null)
             {
@@ -394,5 +397,63 @@ public class TaskController : Controller
             _logger.LogError(ex, "API Error while fetching tasks.");
             return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
+    }
+
+    [HttpPost("{todoListId}/{taskId}/change-status")]
+    public async Task<IActionResult> ChangeTaskStatus(int todoListId, int taskId, ToDoTaskStatus newStatus)
+    {
+        try
+        {
+            var updateStatusRequest = new UpdateTaskStatusRequest { TodoListId = todoListId, NewStatus = newStatus };
+
+            var updatedTaskDto = await _todoListApi.UpdateTaskStatusAsync(taskId, updateStatusRequest);
+
+            if (updatedTaskDto == null)
+            {
+                TempData["ErrorMessage"] = "Task not found.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Task status updated successfully!";
+            }
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, "API error while updating task status: {StatusCode} - {Message}", ex.StatusCode, ex.Message);
+
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                TempData["ErrorMessage"] = "Task not found.";
+            }
+            else if (ex.StatusCode == HttpStatusCode.Forbidden)
+            {
+                TempData["ErrorMessage"] = "You are not authorized to update this task.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating the task status. Please try again later.";
+            }
+        }
+
+        return RedirectToAction("Details", "Task", new { taskId = taskId, todoListId = todoListId });
+    }
+
+
+// GetTaskDetailsViewModel Method (Helper)
+    private async Task<TaskDetailsViewModel> GetTaskDetailsViewModel(int taskId)
+    {
+        var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
+        if (taskDto == null)
+        {
+            return null;
+        }
+
+        var todoListDto = await _todoListApi.GetTodoListById(taskDto.TodoListId);
+
+        return new TaskDetailsViewModel
+        {
+            SelectedTask = _mapper.Map<TodoTask>(taskDto),
+            TodoList = _mapper.Map<TodoListDto>(todoListDto)
+        };
     }
 }

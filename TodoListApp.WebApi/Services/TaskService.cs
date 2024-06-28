@@ -187,9 +187,7 @@ public class TaskService : ITaskService
         // 4. Update the task status and save changes
         taskEntity.Status = newStatus;
         await _context.SaveChangesAsync();
-
-        // 5. Return the updated task (optional)
-        return _mapper.Map<TodoTask>(taskEntity);
+        return _mapper.Map<TodoTask>(taskEntity); // Use AutoMapper to map
     }
 
     public List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")

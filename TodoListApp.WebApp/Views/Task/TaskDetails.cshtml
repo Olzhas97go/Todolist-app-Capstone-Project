@@ -1,22 +1,26 @@
-﻿@model TaskDetailsViewModel
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using TodoListApp.WebApi.Models
+@model TaskDetailsViewModel
 
 <div class="card">
     <div class="card-header">
         <h2>@Model.SelectedTask.Title</h2>
     </div>
     <div class="card-body">
-        <p>Description:@Model.SelectedTask.Description</p>
-        <p>Status:@Model.SelectedTask.Status.ToString()</p>
-        <p>Created At:@Model.SelectedTask.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        <p>Description: @Model.SelectedTask.Description</p>
+        <p>Status: @(Model.SelectedTask.Status.ToString())</p>
+        <p>Created At: @(Model.SelectedTask.CreatedDate == DateTime.MinValue ? "Date not set" : Model.SelectedTask.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss"))</p>
 
         @if (Model.SelectedTask.DueDate.HasValue)
         {
-            <p>Due Date:@Model.SelectedTask.DueDate.Value.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        <p>Due Date: @Model.SelectedTask.DueDate.Value</p> @* No formatting needed here since it's already converted *@
         }
+        <p>Is Completed: @Model.SelectedTask.IsCompleted</p>
+        <p>Todo List: @Model.TodoList.Name</p>
 
-        <p>Is Completed:@Model.SelectedTask.IsCompleted.ToString()</p>
-        <p>Todo List:@Model.TodoList.Name</p>
-
-        <a asp-action="ViewTasks" asp-controller="Task" asp-route-todoListId="@Model.TodoList.Id" class="btn btn-secondary">Back to Tasks</a>
+        <a asp-action="ViewTasks"
+           asp-controller="Task"
+           asp-route-todoListId="@Model.TodoList.Id"
+           class="btn btn-secondary">Back to Tasks</a>
     </div>
 </div>

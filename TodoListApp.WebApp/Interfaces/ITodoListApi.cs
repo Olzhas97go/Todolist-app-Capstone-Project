@@ -38,5 +38,9 @@ public interface ITodoListApi
 // In ITodoListApi.cs
     [Get("/api/Task/GetMyTasks")]
     Task<List<TodoTask>> GetMyTasks([Query] string userId, [Query] ToDoTaskStatus? status = null, [Query] string sortBy = "Name", [Query] string sortOrder = "asc");
-
+    // In your ITodoListApi interface
+    // In your ITodoListApi interface
+    // In your ITodoListApi interface
+    [Put("/api/tasks/{taskId}/status")] // Corrected endpoint
+    Task<TodoTaskDto> UpdateTaskStatusAsync(int taskId, [Body] UpdateTaskStatusRequest request);
 }

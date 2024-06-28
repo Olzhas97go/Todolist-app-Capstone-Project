@@ -30,6 +30,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<TodoListModel>>> GetAllTodoLists()
     {
         try
@@ -46,7 +47,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "OwnerPolicy")]
     public async Task<ActionResult<TodoListDto>> CreateTodoList([FromBody] TodoListDto todoListDto)
     {
         if (!ModelState.IsValid)
@@ -80,7 +81,7 @@ public class TodoListController : ControllerBase
 
 
     [HttpDelete("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "OwnerPolicy")]
     public async Task<IActionResult> DeleteTodoList(int id)
     {
         try
@@ -100,7 +101,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = "EditTodoListPolicy")]
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<IActionResult> UpdateTodoList(int id, [FromBody] TodoListDto todoListDto)
     {
         if (id != todoListDto.Id)
@@ -137,9 +138,19 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult> GetTodoListById(int id)
     {
+        var roleClaim = User.FindFirst(ClaimTypes.Role);
+        if (roleClaim != null)
+        {
+            var userRole = roleClaim.Value;
+            _logger.LogInformation("User role: {UserRole}", userRole);
+        }
+        else
+        {
+            _logger.LogWarning("User role claim not found");
+        }
         // 1. Verify Authorization (JWT Token)
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 

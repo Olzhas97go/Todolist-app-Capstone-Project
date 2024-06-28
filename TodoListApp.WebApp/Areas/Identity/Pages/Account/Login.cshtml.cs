@@ -47,10 +47,13 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, "Owner")
                 // Add other claims as needed
             };
-
+            var userRole = user.Role.ToString();
+            if (!string.IsNullOrEmpty(userRole))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:TokenSigningKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddDays(7);
