@@ -12,4 +12,5 @@ public class TaskDetailsViewModel
 
     public TodoListDetailsDto TodoListDetails { get; set; }
     public List<TodoTaskDto> AllTasks { get; set; }
+    public string ReturnUrl { get; set; } = "";
 }

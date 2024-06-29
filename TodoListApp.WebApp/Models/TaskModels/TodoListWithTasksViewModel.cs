@@ -13,5 +13,5 @@ public class TodoListWithTasksViewModel
     public ToDoTaskStatus? StatusFilter { get; set; }
     public string SortBy { get; set; } = "Name"; // Default sort by name
     public string SortOrder { get; set; } = "asc";
-    public string SearchString { get; set; }
+    public string SearchString { get; set; } = "";
 }

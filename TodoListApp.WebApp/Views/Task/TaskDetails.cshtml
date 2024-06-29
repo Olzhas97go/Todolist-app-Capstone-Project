@@ -13,14 +13,12 @@
 
         @if (Model.SelectedTask.DueDate.HasValue)
         {
-        <p>Due Date: @Model.SelectedTask.DueDate.Value</p> @* No formatting needed here since it's already converted *@
+            <p>Due Date: @Model.SelectedTask.DueDate.Value</p>
         }
         <p>Is Completed: @Model.SelectedTask.IsCompleted</p>
         <p>Todo List: @Model.TodoList.Name</p>
 
-        <a asp-action="ViewTasks"
-           asp-controller="Task"
-           asp-route-todoListId="@Model.TodoList.Id"
-           class="btn btn-secondary">Back to Tasks</a>
+        @await Component.InvokeAsync("BackButton")
+
     </div>
 </div>

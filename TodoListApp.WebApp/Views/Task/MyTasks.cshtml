@@ -15,8 +15,8 @@
         }
 
         @* Search Form *@
-        <form asp-action="MyTasks" method="get" class="form-inline mb-3">
-            <input type="text" name="searchString" class="form-control mr-sm-2" placeholder="Search by Title" value="@Model.SearchString" />
+        <form asp-action="MyTasks" method="get" class="d-flex">
+            <input type="text" name="searchString" class="form-control me-2" placeholder="Search by Title" value="@Model.SearchString" />
             <button type="submit" class="btn btn-outline-success">Search</button>
         </form>
 
@@ -36,8 +36,9 @@
                     }
                 </div>
                 <div class="d-flex justify-content-end">
-                    <a asp-action="Details" asp-controller="Task" class="btn btn-sm btn-info"
-                       asp-route-taskId="@task.Id">Details</a>
+                    <a asp-action="Details" asp-controller="Task" asp-route-taskId="@task.Id"
+                       asp-route-source="mytasks"
+                       class="btn btn-sm btn-info">Details</a>
                     <a asp-action="EditTask" asp-controller="Task" class="btn btn-sm btn-warning"
                        asp-route-taskId="@task.Id">Edit</a>
 
@@ -60,7 +61,18 @@
         }
 
         <div class="d-flex justify-content-start">
-            <a asp-action="CreateTask" asp-controller="Task" class="btn btn-success mt-3">Create Task</a>
+            @if (Model.Tasks.Any())
+            {
+            var firstTask = Model.Tasks.FirstOrDefault();
+            if (firstTask != null)
+            {
+            <a asp-action="CreateTask" asp-controller="Task" asp-route-todoListId="@firstTask.TodoListId" class="btn btn-success mt-3">Create Task</a>
+            }
+            else
+            {
+            <p>You don't have any tasks yet. Create a to-do list first!</p>
+            }
+            }
         </div>
     </div>
 </div>

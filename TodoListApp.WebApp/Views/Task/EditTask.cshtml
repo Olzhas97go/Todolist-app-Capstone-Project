@@ -24,7 +24,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="Status"></label>
-                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ToDoTaskStatus>()" class="form-control" id="statusDropdown"></select>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ToDoTaskStatus>()" class="form-control" id="statusSelect">
+                </select>
             </div>
             <div class="form-group form-check">
                 <input type="checkbox" asp-for="IsCompleted" class="form-check-input" />
@@ -35,30 +36,3 @@
         </form>
     </div>
 </div>
-
-<script>
-$(document).ready(function() {
-    $('#statusDropdown').change(function() {
-        var taskId = @Model.Id;
-        var newStatus = $(this).val();
-        var todoListId = @Model.TodoListId; // Make sure this is included in your model
-        var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val(); // Get the anti-forgery token
-
-        $.ajax({
-            url: `/Task/${todoListId}/${taskId}/change-status`,
-            type: 'POST',
-            headers: {
-                'RequestVerificationToken': antiForgeryToken  // Include the token in the headers
-            },
-            data: { newStatus: newStatus },
-            success: function(result) {
-                // Optionally, provide visual feedback (e.g., change the background color of the status dropdown)
-                alert('Task status updated successfully!');
-            },
-            error: function() {
-                alert('Error updating task status.');
-            }
-        });
-    });
-});
-</script>

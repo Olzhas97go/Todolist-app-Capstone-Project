@@ -44,6 +44,6 @@ public interface ITodoListApi
     // In your ITodoListApi interface
     [Put("/api/tasks/{taskId}/status")] // Corrected endpoint
     Task<TodoTaskDto> UpdateTaskStatusAsync(int taskId, [Body] UpdateTaskStatusRequest request);
-    [Get("/api/todolist/search")] // Use the correct path based on your API route
+    [Get("/api/task/search")] // Use the correct path based on your API route
     Task<IEnumerable<TodoTaskDto>> Search([Query] string title);
 }

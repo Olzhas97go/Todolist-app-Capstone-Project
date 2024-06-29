@@ -1,0 +1,6 @@
+﻿@model BackButtonViewModel
+
+<a asp-action="@Model.ActionName"
+   asp-controller="Task"
+   asp-route-todoListId="@Model.TodoListId"
+   class="btn btn-secondary">@Model.ButtonText</a>

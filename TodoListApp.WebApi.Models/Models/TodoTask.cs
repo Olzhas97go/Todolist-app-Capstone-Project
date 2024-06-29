@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TodoListApp.WebApi.Models.Models;
 
@@ -20,6 +21,7 @@ public class TodoTask
     public int TodoListId { get; set; }
 
     public bool IsOverdue { get; set; } // For US10
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ToDoTaskStatus Status { get; set; }
     public string UserId { get; set; } = string.Empty;
 }

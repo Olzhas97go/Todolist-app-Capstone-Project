@@ -119,7 +119,7 @@ public class TaskController : Controller
             var viewModel = new TaskDetailsViewModel
             {
                 SelectedTask = taskViewModel,
-                TodoList = _mapper.Map<TodoListDto>(todoListWebApiModel) // Map to TodoListDto
+                TodoList = _mapper.Map<TodoListDto>(todoListWebApiModel), // Map to TodoListDto
             };
 
             return View("TaskDetails", viewModel);
