@@ -92,7 +92,8 @@ public static class ServiceExtensions
     {
         services.AddScoped<ITodoListDatabaseService, TodoListDatabaseService>();
         services.AddScoped<ITaskService, TaskService>();
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<ICommentService, CommentService>();
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)

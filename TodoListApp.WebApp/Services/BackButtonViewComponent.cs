@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 
 public class BackButtonViewComponent : ViewComponent
 {
@@ -12,19 +11,35 @@ public class BackButtonViewComponent : ViewComponent
 
     public IViewComponentResult Invoke()
     {
-        var referer = _httpContextAccessor.HttpContext.Request.Headers["Referer"].ToString();
-        var todoListId = _httpContextAccessor.HttpContext.Request.Query["todoListId"];
+        string source = _httpContextAccessor.HttpContext?.Request?.Query["source"];
 
-        return View(new BackButtonViewModel
+        if (!string.IsNullOrEmpty(source) && source.ToLower() == "mytasks")
         {
-            ActionName = referer.Contains("/MyTasks") ? "MyTasks" : "ViewTasks",
-            ButtonText = referer.Contains("/MyTasks") ? "Back to My Tasks" : "Back to Tasks",
-            TodoListId = todoListId
-        });
+            return View(new BackButtonViewModel
+            {
+                ActionName = "MyTasks",
+                ButtonText = "Back to My Tasks"
+            });
+        }
+        else
+        {
+            string todoListId = _httpContextAccessor.HttpContext?.Request?.Query["todoListId"];
+            if (string.IsNullOrEmpty(todoListId))
+            {
+                return Content("Error: Missing todoListId."); // Or handle the error differently
+            }
+
+            return View(new BackButtonViewModel
+            {
+                ActionName = "ViewTasks",
+                ButtonText = "Back to Tasks",
+                TodoListId = todoListId
+            });
+        }
     }
 }
 
-
+// BackButtonViewModel (no changes)
 public class BackButtonViewModel
 {
     public string ActionName { get; set; }

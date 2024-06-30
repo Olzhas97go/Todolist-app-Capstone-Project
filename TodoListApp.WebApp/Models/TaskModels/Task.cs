@@ -15,7 +15,7 @@ public class Task
 
     public ToDoTaskStatus Status { get; set; }
 
-    public DateTime? DueDate { get; set; }
+    public DateTime? DueDate { get; set; } = DateTime.UtcNow;
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 

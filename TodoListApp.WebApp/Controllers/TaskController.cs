@@ -72,78 +72,65 @@ public class TaskController : Controller
     }
 
 
-    [HttpGet("{taskId}")]
-    public async Task<IActionResult> Details(int taskId)
+   [HttpGet("{taskId}")]
+public async Task<IActionResult> Details(int taskId)
+{
+    try
     {
-        try
+        var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
+        if (taskDto == null)
         {
-            var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
-            if (taskDto == null)
-            {
-                return NotFound("Task not found.");
-            }
-
-            var todoListDto = await _todoListApi.GetTodoListById(taskDto.TodoListId);
-            if (todoListDto == null)
-            {
-                return NotFound("Todo list associated with task not found.");
-            }
-
-            // Create an empty list to store tasks
-            var taskList = new List<TodoTaskDto>();
-
-            // Fetch all tasks using the TaskIds and add them to the list
-            foreach (var id in todoListDto.TaskIds)
-            {
-                taskDto = await _todoListApi.GetTaskByIdAsync(id);
-                if (taskDto != null)
-                {
-                    var taskDtoMapped = _mapper.Map<TodoTaskDto>(taskDto);
-                    taskList.Add(taskDtoMapped);
-                }
-            }
-
-            // Filter to the SelectedTask by taskId
-            var selectedTaskDto = taskList.SingleOrDefault(x => x.Id == taskId);
-            var selectedTask = _mapper.Map<TodoTask>(selectedTaskDto);
-            var taskViewModel = _mapper.Map<TodoTask>(selectedTaskDto);
-
-            var todoListWebApiModel = new TodoListWebApiModel
-            {
-                Id = todoListDto.Id,
-                Name = todoListDto.Name,
-                Description = todoListDto.Description,
-                Tasks = taskList // Update the list of tasks
-            };
-
-            var viewModel = new TaskDetailsViewModel
-            {
-                SelectedTask = taskViewModel,
-                TodoList = _mapper.Map<TodoListDto>(todoListWebApiModel), // Map to TodoListDto
-            };
-
-            return View("TaskDetails", viewModel);
+            return NotFound("Task not found.");
         }
-        catch (ApiException ex)
+
+        var todoListDto = await _todoListApi.GetTodoListById(taskDto.TodoListId);
+        if (todoListDto == null)
         {
-            // Handle API exceptions
-            _logger.LogError(ex, "API error fetching task details: {StatusCode}",
-                ex.StatusCode); // Use the injected logger
-            return StatusCode((int)ex.StatusCode);
+            return NotFound("Todo list associated with task not found.");
         }
-        catch (DbUpdateException ex)
+
+        var allTasksDto = await _todoListApi.GetTasksForTodoListAsync(todoListDto.Id);
+        var tagDtos = await _todoListApi.GetTagsForTaskAsync(taskId);
+        // Map to the correct types
+        var selectedTask = _mapper.Map<TodoTask>(taskDto);
+        var allTasks = _mapper.Map<List<TodoTaskDto>>(allTasksDto);
+
+        var viewModel = new TaskDetailsViewModel
         {
-            // Handle database update exceptions
-            this._logger.LogError(ex, "Error updating database");
-            return StatusCode(500); // Internal Server Error
+            SelectedTask = selectedTask,
+            TodoList = _mapper.Map<TodoListDto>(todoListDto), // Map to TodoListDto
+            AllTasks = allTasks,
+            Tags = _mapper.Map<List<TagDto>>(tagDtos)
+        };
+
+        return View("TaskDetails", viewModel);
+    }
+    catch (ApiException apiEx) // Catch Refit's specific exception
+    {
+        _logger.LogError(apiEx, "API error fetching task details: {StatusCode}", apiEx.StatusCode);
+
+        if (apiEx.StatusCode == HttpStatusCode.NotFound)
+        {
+            return NotFound("Task or related data not found.");
         }
-        catch (Exception ex)
+        else
         {
-            // Catch any other unexpected exceptions and rethrow
-            this._logger.LogError(ex, "An unexpected error occurred.");
-            throw; // Rethrow the exception
+            return StatusCode((int)apiEx.StatusCode, "API error occurred while retrieving task details.");
         }
     }
+    catch (DbUpdateException ex)
+    {
+        // Handle database update exceptions
+        this._logger.LogError(ex, "Error updating database");
+        return StatusCode(500); // Internal Server Error
+    }
+    catch (Exception ex)
+    {
+        // Catch any other unexpected exceptions and rethrow
+        this._logger.LogError(ex, "An unexpected error occurred.");
+        throw; // Rethrow the exception
+    }
+}
 
     [HttpGet("{todoListId}/CreateTask")]
     public async Task<IActionResult> CreateTask(int todoListId)
@@ -340,8 +327,8 @@ public class TaskController : Controller
                 return this.NotFound();
             }
 
+            TempData["ShowBackToTasksLink"] = true; // Set TempData flag after successful edit
             return RedirectToAction("Details", "Task", new { taskId = updatedTask.Id });
-
         }
         catch (ApiException ex)
         {
@@ -385,6 +372,8 @@ public class TaskController : Controller
             {
                 tasks = _mapper.Map<IEnumerable<TodoTask>>(await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder)); // Map to TodoTask
             }
+
+            tasks = tasks.Where(t => t.UserId == userId);
 
             var taskListModels = _mapper.Map<List<TodoListModel>>(tasks);
 

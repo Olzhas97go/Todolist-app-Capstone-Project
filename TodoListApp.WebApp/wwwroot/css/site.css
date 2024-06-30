@@ -120,4 +120,40 @@ body {
 .hero-section h1 {
     font-weight: 600;  /* Slightly bolder font */
 }
+.bg-custom-1 { background-color: #007bff; }
+.bg-custom-2 { background-color: #6c757d; }
+.bg-custom-3 { background-color: #28a745; }
+.bg-custom-4 { background-color: #dc3545; }
+.bg-custom-5 { background-color: #17a2b8; }
+.bg-custom-6 { background-color: #ffc107; }
+.bg-custom-7 { background-color: #6f42c1; }
 
+.card-custom {
+    background-color: #26bb26; /* Change this to the desired color */
+}
+
+.btn-primary-custom {
+    background-color: #26bb26; /* Change this to the desired color */
+    border-color: #26bb26; /* Change this to the desired color */
+    color: #ffffff; /* Change this to the desired color */
+}
+
+.btn-primary-custom:hover {
+    background-color: #0fcc28; /* Change this to the desired hover color */
+    border-color: #0fcc28; /* Change this to the desired hover color */
+    color: #ffffff; /* Change this to the desired color */
+}
+
+.card-custom h2 {
+    color: #ffffff; /* Change this to the desired color */
+}
+.card-custom .card-header {
+    background-color: #007bff; /* Change this to the desired background color */
+    color: white; /* Change the text color to white */
+}
+.mt-button {
+    margin-top: 1rem; /* Change this to the desired margin value */
+}
+.card-custom .card-header h2 {
+    color: #007bff; /* Change this to the desired color */
+}

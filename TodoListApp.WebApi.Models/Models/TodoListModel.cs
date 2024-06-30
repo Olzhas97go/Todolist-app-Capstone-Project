@@ -13,7 +13,8 @@ public class TodoListModel
     public string? Description { get; set; }
     public string UserId { get; set; } = string.Empty;
     public ToDoTaskStatus Status { get; set; }
-    public DateTime? DueDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime? DueDate { get; set; } = DateTime.UtcNow;
     public bool IsOverdue { get; set; }
     public bool IsCompleted { get; set; }
     public int TodoListId { get; set; }

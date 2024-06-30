@@ -1,0 +1,46 @@
+﻿@model IEnumerable<TodoListApp.WebApp.Models.TaskModels.TodoTaskViewModel>
+
+@{
+    ViewData["Title"] = "Tasks by Tag";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Tasks with tag: @ViewData["TagText"]</h2>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Due Date</th>
+                    <th>Todo List</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var task in Model)
+                {
+                    <tr>
+                        <td>@task.Title</td>
+                        <td>@task.Description</td>
+                        <td>@task.Status.ToString()</td>
+                        <td>@task.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@(task.DueDate.HasValue ? task.DueDate.Value.ToString("yyyy-MM-dd HH:mm:ss") : "-")</td>
+                        <td>@task.TodoListId</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-secondary mt-3" onclick="javascript:history.back();">Back to Details</button>
+        }
+        else
+        {
+            <p>No tasks found with the tag: @ViewData["TagText"]</p>
+        }
+    </div>
+</div>

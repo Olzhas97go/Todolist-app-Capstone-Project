@@ -54,5 +54,8 @@ public class WebApiMappingProfile : Profile
         CreateMap<TodoTask, TodoTaskDto>()
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
+        CreateMap<TagDto, TagEntity>().ReverseMap();
+        CreateMap<CommentEntity, CommentDto>().ReverseMap();
     }
 }

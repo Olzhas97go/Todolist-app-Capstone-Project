@@ -8,10 +8,11 @@
     </div>
     <div class="card-body">
         <form asp-action="EditTask" asp-controller="Task" method="post">
-            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" id="sourceUrl" value="@Context.Request.Headers["Referer"]" />
+            <input type="hidden" name="Id" value="@Model.Id"/>
             <div class="form-group">
                 <label for="title">Title:</label>
-                <input type="text" class="form-control" id="title" name="Title" value="@Model.Title" required />
+                <input type="text" class="form-control" id="title" name="Title" value="@Model.Title" required/>
             </div>
             <div class="form-group">
                 <label for="description">Description:</label>
@@ -19,7 +20,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="DueDate"></label>
-                <input asp-for="DueDate" class="form-control" type="date" />
+                <input asp-for="DueDate" class="form-control" type="datetime-local"/>
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,7 +29,7 @@
                 </select>
             </div>
             <div class="form-group form-check">
-                <input type="checkbox" asp-for="IsCompleted" class="form-check-input" />
+                <input type="checkbox" asp-for="IsCompleted" class="form-check-input"/>
                 <label asp-for="IsCompleted" class="form-check-label">Is Completed</label>
             </div>
             <button type="submit" class="btn btn-primary">Save <Changes></Changes></button>
@@ -36,3 +37,47 @@
         </form>
     </div>
 </div>
+@{
+var newTagAdded = ViewData["NewTagAdded"] as bool? ?? false;
+}
+
+@if (newTagAdded)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    A new tag has been added to the task.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+<div class="card mt-3">
+    <div class="card-header card-custom">
+        <h2>Add Tag to Task</h2>
+    </div>
+    <div class="card-body">
+        @if (TempData["TagAddedSuccessfully"] != null && (bool)TempData["TagAddedSuccessfully"])
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                The tag has been added successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form asp-controller="Tag" asp-action="AddTag" asp-route-taskId="@Model.Id" method="post">
+            <input type="hidden" name="TaskId" value="@Model.Id" />
+            <div class="form-group">
+                <label for="tagText">Tag text:</label>
+                <input type="text" class="form-control" id="tagText" name="Text" required />
+            </div>
+            <button type="submit" class="btn btn-primary-custom mt-button" >Add Tag</button>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(function () {
+            // Remove the success alert when it's closed
+            $('.alert-dismissible').on('closed.bs.alert', function () {
+                @TempData.Remove("TagAddedSuccessfully");
+            });
+        });
+    </script>
+}

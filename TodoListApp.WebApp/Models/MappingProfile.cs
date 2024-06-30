@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Automation;
 using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Models;
+using TodoListApp.WebApi.Profiles;
 using TodoListApp.WebApp.Models;
 using TodoListApp.WebApp.Models.TaskModels;
 using Task = TodoListApp.WebApp.Models.TaskModels.Task;
@@ -87,5 +89,22 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.DueDate < DateTime.Now))
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId)); // Add this line
 
+        CreateMap<TodoTask, TodoTaskDto>()
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.IsOverdue));
+
+        // In your MappingProfile class
+        CreateMap<TodoListDetailsDto, TodoListDto>()
+            .ForMember(dest => dest.Tasks, // Assuming TodoListDto has a Tasks property
+                opt => opt.MapFrom(src => src.TaskIds.Select(id => new TodoTaskDto { Id = id })))
+            .ForMember(dest => dest.Status, opt => opt.Ignore());
+        CreateMap<TodoTaskDto, TodoTaskViewModel>()
+            .ReverseMap();
+        CreateMap<TagCreateViewModel, TagDto>()
+            .ForMember(dest => dest.TaskId, opt => opt.MapFrom(src => src.TaskId))
+            .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Text))
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Tasks, opt => opt.Ignore());
     }
 }

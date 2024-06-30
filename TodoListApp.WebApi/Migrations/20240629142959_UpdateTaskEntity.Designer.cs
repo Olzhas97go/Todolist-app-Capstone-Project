@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TodoListApp.WebApi.Data;
 
@@ -11,9 +12,10 @@ using TodoListApp.WebApi.Data;
 namespace TodoListApp.WebApi.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    partial class TodoListDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240629142959_UpdateTaskEntity")]
+    partial class UpdateTaskEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,36 +23,6 @@ namespace TodoListApp.WebApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("TodoListApp.WebApi.Entities.CommentEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("User")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("Comments");
-                });
 
             modelBuilder.Entity("TodoListApp.WebApi.Entities.TagEntity", b =>
                 {
@@ -148,17 +120,6 @@ namespace TodoListApp.WebApi.Migrations
                     b.ToTable("TodoLists");
                 });
 
-            modelBuilder.Entity("TodoListApp.WebApi.Entities.CommentEntity", b =>
-                {
-                    b.HasOne("TodoListApp.WebApi.Entities.TaskEntity", "Task")
-                        .WithMany("Comments")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
-                });
-
             modelBuilder.Entity("TodoListApp.WebApi.Entities.TagEntity", b =>
                 {
                     b.HasOne("TodoListApp.WebApi.Entities.TaskEntity", "Task")
@@ -183,8 +144,6 @@ namespace TodoListApp.WebApi.Migrations
 
             modelBuilder.Entity("TodoListApp.WebApi.Entities.TaskEntity", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Tags");
                 });
 

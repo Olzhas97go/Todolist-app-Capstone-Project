@@ -17,7 +17,7 @@ public class TaskEntity
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-    public DateTime? DueDate { get; set; }
+    public DateTime? DueDate { get; set; } = DateTime.UtcNow;
 
     [NotMapped] // Don't store in database
     public bool IsOverdue => DueDate.HasValue && DueDate < DateTime.Now;
@@ -35,4 +35,6 @@ public class TaskEntity
     public byte[] RowVersion { get; set; } = null!;
 
     public string UserId { get; set; } = string.Empty;
+    public List<TagEntity> Tags { get; set; } = new List<TagEntity>();
+    public List<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 }

@@ -46,4 +46,15 @@ public interface ITodoListApi
     Task<TodoTaskDto> UpdateTaskStatusAsync(int taskId, [Body] UpdateTaskStatusRequest request);
     [Get("/api/task/search")] // Use the correct path based on your API route
     Task<IEnumerable<TodoTaskDto>> Search([Query] string title);
+    [Get("/api/tags/task/{taskId}")]
+    Task<IEnumerable<TagDto>> GetTagsForTaskAsync(int taskId);
+    // In your ITodoListApi interface
+    [Get("/api/tags/tasks/{tagText}")]
+    Task<ApiResponse<IEnumerable<TodoTaskDto>>> GetTasksByTagAsync(string tagText);
+
+    [Post("/api/tags/create")]
+    Task<ApiResponse<TagDto>> CreateTagAsync(TagDto tagDto);
+
+    // [Delete("api/tags/delete/{id}")]
+    // Task<HttpResponseMessage> DeleteTagAsync(int id);
 }

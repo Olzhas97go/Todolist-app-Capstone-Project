@@ -14,13 +14,13 @@ public class TodoTask
     public string? Description { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-    public DateTime? DueDate { get; set; }
+    public DateTime? DueDate { get; set; } = DateTime.UtcNow;
 
     public bool IsCompleted { get; set; }
 
     public int TodoListId { get; set; }
 
-    public bool IsOverdue { get; set; } // For US10
+    public bool IsOverdue { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ToDoTaskStatus Status { get; set; }
     public string UserId { get; set; } = string.Empty;

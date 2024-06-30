@@ -15,8 +15,7 @@
         }
 
         @* Search Form *@
-        <form asp-action="MyTasks" method="get" class="d-flex">
-            <input type="text" name="searchString" class="form-control me-2" placeholder="Search by Title" value="@Model.SearchString" />
+        <form asp-action="MyTasks" method="get" class="d-flex mb-3"> <input type="text" name="searchString" class="form-control me-2" placeholder="Search by Title" value="@Model.SearchString" />
             <button type="submit" class="btn btn-outline-success">Search</button>
         </form>
 
