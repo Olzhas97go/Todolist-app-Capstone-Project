@@ -10,11 +10,18 @@ public class TodoTaskDto
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; }
+
     public ToDoTaskStatus Status { get; set; }
+
     public bool IsCompleted { get; set; }
+
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
     public DateTime? DueDate { get; set; } = DateTime.UtcNow;
+
     public int TodoListId { get; set; }
+
     public bool IsOverdue { get; set; }
+
     public string  UserId { get; set; } // Make sure this is included
 }

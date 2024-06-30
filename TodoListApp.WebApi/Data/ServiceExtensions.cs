@@ -27,7 +27,7 @@ public static class ServiceExtensions
             throw new InvalidOperationException("JWT TokenSigningKey is not configured.");
         }
 
-        var issuerSigningKey = Encoding.UTF8.GetBytes(tokenSigningKey);// Use configuration passed in
+        var issuerSigningKey = Encoding.UTF8.GetBytes(tokenSigningKey);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -36,16 +36,15 @@ public static class ServiceExtensions
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(issuerSigningKey),
-                    ValidateIssuer = configuration.GetValue<bool>("Jwt:ValidateIssuer", false), // Get from config with default
-                    ValidateAudience = configuration.GetValue<bool>("Jwt:ValidateAudience", false), // Get from config with default
-                    ValidateLifetime = true // Important: Validate token lifetime
+                    ValidateIssuer = configuration.GetValue<bool>("Jwt:ValidateIssuer", false),
+                    ValidateAudience = configuration.GetValue<bool>("Jwt:ValidateAudience", false),
+                    ValidateLifetime = true,
                 };
 
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        // Optional: Extract token from cookie if needed
                         var token = context.Request.Cookies["jwtToken"];
                         if (!string.IsNullOrEmpty(token))
                         {
@@ -73,7 +72,7 @@ public static class ServiceExtensions
                 Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
                 In = ParameterLocation.Header,
                 Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
+                Type = SecuritySchemeType.ApiKey,
             });
 
             options.OperationFilter<SecurityRequirementsOperationFilter>();

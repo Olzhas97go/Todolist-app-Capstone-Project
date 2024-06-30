@@ -15,7 +15,8 @@ public class TodoListEntity
 
     [MaxLength(500)]
     public string? Description { get; set; }
-    public string UserId { get; set; } = string.Empty; // Add this line
+
+    public string UserId { get; set; } = string.Empty;
 
     public List<TaskEntity> Tasks { get; set; } = new();
 }

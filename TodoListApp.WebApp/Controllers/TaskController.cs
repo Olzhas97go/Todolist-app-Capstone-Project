@@ -19,16 +19,16 @@ namespace TodoListApp.WebApp.Controllers;
 
 public class TaskController : Controller
 {
-    private readonly ITodoListApi _todoListApi; // Refit interface
+    private readonly ITodoListApi _todoListApi;
     private readonly IMapper _mapper;
     private readonly ILogger<TodoListController> _logger;
     private readonly ITaskService _taskService;
 
     public TaskController(ITodoListApi todoListApi, IMapper mapper, ILogger<TodoListController> logger)
     {
-        _logger = logger;
-        _todoListApi = todoListApi;
-        _mapper = mapper;
+        this._logger = logger;
+        this._todoListApi = todoListApi;
+        this._mapper = mapper;
     }
 
     [HttpGet("{todoListId}/tasks")]
@@ -36,129 +36,125 @@ public class TaskController : Controller
     {
         try
         {
-            var todoList = await _todoListApi.GetTodoListById(todoListId);
+            var todoList = await this._todoListApi.GetTodoListById(todoListId);
             if (todoList == null)
             {
-                return NotFound("Todo list not found.");
+                return this.NotFound("Todo list not found.");
             }
 
-            var tasks = await _todoListApi.GetTasksForTodoListAsync(todoListId); // Gets a list of TodoTask objects
+            var tasks = await this._todoListApi.GetTasksForTodoListAsync(todoListId);
 
             var todoListModels = tasks.Select(t => new TodoListModel
             {
                 Id = t.Id,
-                Name = t.Title,    // Map Title to Name
-                IsCompleted = t.IsCompleted, // Add IsCompleted property to TodoListModel
-                IsOverdue = t.DueDate < DateTime.Now  // Add IsOverdue property to TodoListModel
+                Name = t.Title,
+                IsCompleted = t.IsCompleted,
+                IsOverdue = t.DueDate < DateTime.Now,
             }).ToList();
 
             var viewModel = new TodoListWithTasksViewModel
             {
                 TodoList = todoList,
-                Tasks = todoListModels // Now uses TodoListModel
+                Tasks = todoListModels
             };
 
-            return View("ViewTasks", viewModel);
+            return this.View("ViewTasks", viewModel);
         }
         catch (ApiException ex)
         {
             if (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+                return this.Redirect("/Identity/Account/Login?ReturnUrl=%2F");
             }
-            _logger.LogError(ex, "API error while fetching todo list details.");
-            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+            return this.View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 
 
-   [HttpGet("{taskId}")]
-public async Task<IActionResult> Details(int taskId)
-{
+    [HttpGet("{taskId}")]
+    public async Task<IActionResult> Details(int taskId)
+    {
     try
     {
-        var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
+        var taskDto = await this._todoListApi.GetTaskByIdAsync(taskId);
         if (taskDto == null)
         {
-            return NotFound("Task not found.");
+            return this.NotFound("Task not found.");
         }
 
-        var todoListDto = await _todoListApi.GetTodoListById(taskDto.TodoListId);
+        var todoListDto = await this._todoListApi.GetTodoListById(taskDto.TodoListId);
         if (todoListDto == null)
         {
-            return NotFound("Todo list associated with task not found.");
+            return this.NotFound("Todo list associated with task not found.");
         }
 
-        var allTasksDto = await _todoListApi.GetTasksForTodoListAsync(todoListDto.Id);
-        var tagDtos = await _todoListApi.GetTagsForTaskAsync(taskId);
-        // Map to the correct types
-        var selectedTask = _mapper.Map<TodoTask>(taskDto);
-        var allTasks = _mapper.Map<List<TodoTaskDto>>(allTasksDto);
+        var allTasksDto = await this._todoListApi.GetTasksForTodoListAsync(todoListDto.Id);
+        var tagDtos = await this._todoListApi.GetTagsForTaskAsync(taskId);
+        var selectedTask = this._mapper.Map<TodoTask>(taskDto);
+        var allTasks = this._mapper.Map<List<TodoTaskDto>>(allTasksDto);
 
         var viewModel = new TaskDetailsViewModel
         {
             SelectedTask = selectedTask,
-            TodoList = _mapper.Map<TodoListDto>(todoListDto), // Map to TodoListDto
+            TodoList = this._mapper.Map<TodoListDto>(todoListDto),
             AllTasks = allTasks,
-            Tags = _mapper.Map<List<TagDto>>(tagDtos)
+            Tags = this._mapper.Map<List<TagDto>>(tagDtos),
         };
 
-        return View("TaskDetails", viewModel);
+        return this.View("TaskDetails", viewModel);
     }
-    catch (ApiException apiEx) // Catch Refit's specific exception
+    catch (ApiException apiEx)
     {
-        _logger.LogError(apiEx, "API error fetching task details: {StatusCode}", apiEx.StatusCode);
+        this._logger.LogError(apiEx, "API error fetching task details: {StatusCode}", apiEx.StatusCode);
 
         if (apiEx.StatusCode == HttpStatusCode.NotFound)
         {
-            return NotFound("Task or related data not found.");
+            return this.NotFound("Task or related data not found.");
         }
         else
         {
-            return StatusCode((int)apiEx.StatusCode, "API error occurred while retrieving task details.");
+            return this.StatusCode((int)apiEx.StatusCode, "API error occurred while retrieving task details.");
         }
     }
     catch (DbUpdateException ex)
     {
-        // Handle database update exceptions
         this._logger.LogError(ex, "Error updating database");
-        return StatusCode(500); // Internal Server Error
+        return this.StatusCode(500); // Internal Server Error
     }
     catch (Exception ex)
     {
-        // Catch any other unexpected exceptions and rethrow
         this._logger.LogError(ex, "An unexpected error occurred.");
-        throw; // Rethrow the exception
+        throw;
     }
-}
+    }
 
     [HttpGet("{todoListId}/CreateTask")]
     public async Task<IActionResult> CreateTask(int todoListId)
     {
         try
         {
-            var todoListDto = await _todoListApi.GetTodoListById(todoListId);
+            var todoListDto = await this._todoListApi.GetTodoListById(todoListId);
             if (todoListDto == null)
             {
-                return NotFound("To-do list not found.");
+                return this.NotFound("To-do list not found.");
             }
 
             var viewModel = new CreateTaskViewModel
             {
-                TodoListId = todoListId, TodoListName = todoListDto.Name, DueDate = DateTime.Today
+                TodoListId = todoListId, TodoListName = todoListDto.Name, DueDate = DateTime.Today,
             };
 
-            return View(viewModel);
+            return this.View(viewModel);
         }
         catch (ApiException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                // Unauthorized access - redirect to login or handle as needed
-                return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+                return this.Redirect("/Identity/Account/Login?ReturnUrl=%2F");
             }
-            _logger.LogError(ex, "API error while fetching todo list for creating a task: {StatusCode}", ex.StatusCode);
-            return StatusCode((int)ex.StatusCode);
+
+            return this.StatusCode((int)ex.StatusCode);
         }
     }
 
@@ -168,65 +164,58 @@ public async Task<IActionResult> Details(int taskId)
     {
         if (!ModelState.IsValid)
         {
-            var todoListDto = await _todoListApi.GetTodoListById(todoListId);
+            var todoListDto = await this._todoListApi.GetTodoListById(todoListId);
             if (todoListDto != null)
             {
                 viewModel.TodoListName = todoListDto.Name;
             }
             else
             {
-                ModelState.AddModelError("", "An error occurred while fetching the to-do list.");
+                this.ModelState.AddModelError("", "An error occurred while fetching the to-do list.");
             }
-
-            //return View(viewModel);
         }
 
         try
         {
-            var todoTaskDto = _mapper.Map<TodoTaskDto>(viewModel);
+            var todoTaskDto = this._mapper.Map<TodoTaskDto>(viewModel);
 
-            // Get the user's ID from the claims
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
             todoTaskDto.TodoListId = todoListId; // Set the todoListId
 
-            // Create the task on the API
-            var newTask = await _todoListApi.AddTask(todoListId, todoTaskDto);
+            var newTask = await this._todoListApi.AddTask(todoListId, todoTaskDto);
 
-            return RedirectToAction("ViewTasks", new { todoListId = viewModel.TodoListId });
+            return this.RedirectToAction("ViewTasks", new { todoListId = viewModel.TodoListId });
 
         }
         catch (Exception ex)
         {
-            if (ex is ApiException apiEx) // Check if it's an ApiException
+            if (ex is ApiException apiEx)
             {
-                _logger.LogError(apiEx, "API error while creating task: {StatusCode} - {Message}", apiEx.StatusCode, apiEx.Message);
+                this._logger.LogError(apiEx, "API error while creating task: {StatusCode} - {Message}", apiEx.StatusCode, apiEx.Message);
 
                 if (apiEx.StatusCode == HttpStatusCode.BadRequest)
                 {
                     var errorContent = await apiEx.GetContentAsAsync<ValidationProblemDetails>();
                     foreach (var error in errorContent.Errors)
                     {
-                        ModelState.AddModelError(error.Key, string.Join(", ", error.Value));
+                        this.ModelState.AddModelError(error.Key, string.Join(", ", error.Value));
                     }
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while creating the task.");
+                    this.ModelState.AddModelError(string.Empty, "An error occurred while creating the task.");
                 }
-
-                // ... (re-fetch todoListDto and return View - same as before)
             }
             else if (ex is DbUpdateException dbEx)
             {
-                // ... (database error handling - same as before)
             }
-            else // Catch-all for unexpected errors
+            else
             {
                 _logger.LogError(ex, "An unexpected error occurred while creating the task.");
-                throw; // Rethrow the exception to be handled globally
+                throw;
             }
 
-            return View(viewModel); // Return the view if there was any error
+            return this.View(viewModel); // Return the view if there was any error
         }
     }
 
@@ -236,50 +225,41 @@ public async Task<IActionResult> Details(int taskId)
     {
         try
         {
-            // 1. Verify Authorization (JWT Token)
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = this.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null)
             {
-                _logger.LogWarning("Missing User ID claim in JWT token.");
-                return Unauthorized("Unauthorized access.");
+                return this.Unauthorized("Unauthorized access.");
             }
 
-            // 2. Verify Ownership (Implement in your service layer)
             var task = await _todoListApi.GetTaskByIdAsync(taskId);
             if (task == null)
             {
-                return NotFound("Task not found.");
+                return this.NotFound("Task not found.");
             }
 
             var todoListId = task.TodoListId;
 
-            // 3. Delete the Task
-            await _todoListApi.DeleteTask(taskId);
+            await this._todoListApi.DeleteTask(taskId);
 
-            // 4. Redirect back to the ViewTasks page for the corresponding TodoList
-            return RedirectToAction("ViewTasks", new { todoListId });
+            return this.RedirectToAction("ViewTasks", new { todoListId });
         }
         catch (ApiException ex)
         {
-            // Handle API-related exceptions
             if (ex.StatusCode == HttpStatusCode.Forbidden)
             {
-                // Unauthorized to delete
-                TempData["ErrorMessage"] = "You do not have permission to delete this task.";
+                this.TempData["ErrorMessage"] = "You do not have permission to delete this task.";
                 return RedirectToAction("AccessDenied", "Error");
             }
             else if (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 // Task not found
-                TempData["ErrorMessage"] = "Task not found.";
-                return RedirectToAction("Index", "TodoList");
+                this.TempData["ErrorMessage"] = "Task not found.";
+                return this.RedirectToAction("Index", "TodoList");
             }
             else
             {
-                // General error
-                _logger.LogError(ex, "An error occurred while deleting the task.");
-                TempData["ErrorMessage"] = "An error occurred while deleting the task.";
-                return RedirectToAction("Index", "TodoList");
+                this.TempData["ErrorMessage"] = "An error occurred while deleting the task.";
+                return this.RedirectToAction("Index", "TodoList");
             }
         }
     }
@@ -292,75 +272,69 @@ public async Task<IActionResult> Details(int taskId)
             var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
             if (taskDto == null)
             {
-                return NotFound("Task not found.");
+                return this.NotFound("Task not found.");
             }
 
-            var taskViewModel = _mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(taskDto);
-            return View(taskViewModel); // Pass the correct view model type
+            var taskViewModel = this._mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(taskDto);
+            return View(taskViewModel);
         }
         catch (ApiException ex)
         {
-            _logger.LogError(ex, message: "API error fetching task details.");
-            return StatusCode((int)ex.StatusCode);
+            return this.StatusCode((int)ex.StatusCode);
         }
     }
 
-// Update the EditTask Post Method
     [HttpPost("{taskId}/edit")]
     public async Task<IActionResult> EditTask([FromQuery] int taskId, TodoListApp.WebApp.Models.TaskModels.Task updatedTask)
     {
         if (!ModelState.IsValid)
         {
-            return View(updatedTask); // Redisplay form with validation errors
+            return View(updatedTask);
         }
 
         try
         {
-            var todoTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
+            var todoTaskDto = this._mapper.Map<TodoTaskDto>(updatedTask);
             todoTaskDto.TodoListId = taskId;
-            todoTaskDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Set the UserId to the current user's ID
-            //todoTaskDto.UserId = "a4cc3e1f-077b-4fd6-add4-13ede58c1c8a";
-            //todoTaskDto.Status = ToDoTaskStatus.Completed;
-            var updatedDto = await _todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
-            if(updatedDto is null)
+            todoTaskDto.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var updatedDto = await this._todoListApi.UpdateTask(updatedTask.Id, todoTaskDto);
+            if (updatedDto is null)
             {
                 return this.NotFound();
             }
 
-            TempData["ShowBackToTasksLink"] = true; // Set TempData flag after successful edit
-            return RedirectToAction("Details", "Task", new { taskId = updatedTask.Id });
+            this.TempData["ShowBackToTasksLink"] = true;
+            return this.RedirectToAction("Details", "Task", new { taskId = updatedTask.Id });
         }
         catch (ApiException ex)
         {
-            // Handle API exceptions (401 Unauthorized, 404 Not Found, others)
             if (ex.StatusCode == HttpStatusCode.Forbidden)
             {
-                TempData["ErrorMessage"] = "You do not have permission to edit this task.";
-                return RedirectToAction("AccessDenied", "Error");
+                return this.RedirectToAction("AccessDenied", "Error");
+            }
+            else if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return this.NotFound(); // Handle the case where the task or list doesn't exist
             }
             else
             {
-                _logger.LogError(ex, "API error while updating task: {StatusCode} - {Message}", ex.StatusCode, ex.Message);
-                ModelState.AddModelError("", "An error occurred while updating the task. Please try again later.");
-
-                return View(updatedTask); // Return the same view model type as in HttpGet
+                return this.RedirectToAction("Error", "Home"); // Example: redirect to a general error page
             }
         }
     }
 
-    // In TaskController.cs
     [HttpGet("MyTasks")]
     public async Task<IActionResult> MyTasks(string searchString = "", string status = null, string sortBy = "Name", string sortOrder = "asc")
     {
         try
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = this.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
-                return Unauthorized("Invalid token: Missing User ID claim.");
+                return this.Unauthorized("Invalid token: Missing User ID claim.");
             }
             string userId = userIdClaim.Value;
-            IEnumerable<TodoTask> tasks; // Change the type to TodoTask
+            IEnumerable<TodoTask> tasks;
 
             if (!string.IsNullOrWhiteSpace(searchString))
             {
@@ -373,9 +347,8 @@ public async Task<IActionResult> Details(int taskId)
                 tasks = _mapper.Map<IEnumerable<TodoTask>>(await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder)); // Map to TodoTask
             }
 
-            tasks = tasks.Where(t => t.UserId == userId);
 
-            var taskListModels = _mapper.Map<List<TodoListModel>>(tasks);
+            var taskListModels = this._mapper.Map<List<TodoListModel>>(tasks);
 
             var viewModel = new TodoListWithTasksViewModel
             {
@@ -384,7 +357,7 @@ public async Task<IActionResult> Details(int taskId)
                 StatusFilter = status != null ? Enum.Parse<ToDoTaskStatus>(status) : null,
                 SortBy = sortBy,
                 SortOrder = sortOrder,
-                SearchString = searchString
+                SearchString = searchString,
             };
 
             return View(viewModel);
@@ -396,52 +369,47 @@ public async Task<IActionResult> Details(int taskId)
                 var validationErrors = await ex.GetContentAsAsync<ValidationProblemDetails>();
                 foreach (var error in validationErrors.Errors)
                 {
-                    ModelState.AddModelError(error.Key, error.Value.First()); // Add error to ModelState
+                    ModelState.AddModelError(error.Key, error.Value.First());
                 }
-                return View("MyTasks"); // Return the view with validation errors
+
+                return this.View("MyTasks");
             }
-            // Handle API errors (e.g., not found, unauthorized, etc.)
-            _logger.LogError(ex, "API Error while fetching tasks.");
-            return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
+
+            return this.StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
 
 
-    // In your TaskController (WebApp)
     public async Task<IActionResult> Search(string searchString)
     {
         try
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = this.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
-                return Unauthorized("Invalid token: Missing User ID claim.");
+                return this.Unauthorized("Invalid token: Missing User ID claim.");
             }
 
             string userId = userIdClaim.Value;
 
-            // Fetch tasks from the API search endpoint
-            var taskDtos = await _todoListApi.Search(searchString);
+            var taskDtos = await this._todoListApi.Search(searchString);
 
-            // Filter tasks by userId to only show tasks for the current user
             var filteredTasks = taskDtos.Where(t => t.UserId == userId);
 
-            // Map to the view model
-            var taskListModels = _mapper.Map<List<TodoListModel>>(filteredTasks);
+            var taskListModels = this._mapper.Map<List<TodoListModel>>(filteredTasks);
 
             var viewModel = new TodoListWithTasksViewModel
             {
                 UserId = userId,
                 Tasks = taskListModels,
-                SearchString = searchString // Pass the search string back to the view
+                SearchString = searchString,
             };
 
-            return View("MyTasks", viewModel); // Reuse the MyTasks view
+            return this.View("MyTasks", viewModel);
         }
         catch (ApiException ex)
         {
-            _logger.LogError(ex, "API Error while fetching tasks.");
-            return StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
+            return this.StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
 
@@ -453,54 +421,35 @@ public async Task<IActionResult> Details(int taskId)
         {
             var updateStatusRequest = new UpdateTaskStatusRequest { TodoListId = todoListId, NewStatus = newStatus };
 
-            var updatedTaskDto = await _todoListApi.UpdateTaskStatusAsync(taskId, updateStatusRequest);
+            var updatedTaskDto = await this._todoListApi.UpdateTaskStatusAsync(taskId, updateStatusRequest);
 
             if (updatedTaskDto == null)
             {
-                TempData["ErrorMessage"] = "Task not found.";
+                this.TempData["ErrorMessage"] = "Task not found.";
             }
             else
             {
-                TempData["SuccessMessage"] = "Task status updated successfully!";
+                this.TempData["SuccessMessage"] = "Task status updated successfully!";
             }
         }
         catch (ApiException ex)
         {
-            _logger.LogError(ex, "API error while updating task status: {StatusCode} - {Message}", ex.StatusCode, ex.Message);
+            this._logger.LogError(ex, "API error while updating task status: {StatusCode} - {Message}", ex.StatusCode, ex.Message);
 
             if (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                TempData["ErrorMessage"] = "Task not found.";
+                this.TempData["ErrorMessage"] = "Task not found.";
             }
             else if (ex.StatusCode == HttpStatusCode.Forbidden)
             {
-                TempData["ErrorMessage"] = "You are not authorized to update this task.";
+                this.TempData["ErrorMessage"] = "You are not authorized to update this task.";
             }
             else
             {
-                TempData["ErrorMessage"] = "An error occurred while updating the task status. Please try again later.";
+                this.TempData["ErrorMessage"] = "An error occurred while updating the task status. Please try again later.";
             }
         }
 
-        return RedirectToAction("Details", "Task", new { taskId = taskId, todoListId = todoListId });
-    }
-
-
-// GetTaskDetailsViewModel Method (Helper)
-    private async Task<TaskDetailsViewModel> GetTaskDetailsViewModel(int taskId)
-    {
-        var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
-        if (taskDto == null)
-        {
-            return null;
-        }
-
-        var todoListDto = await _todoListApi.GetTodoListById(taskDto.TodoListId);
-
-        return new TaskDetailsViewModel
-        {
-            SelectedTask = _mapper.Map<TodoTask>(taskDto),
-            TodoList = _mapper.Map<TodoListDto>(todoListDto)
-        };
+        return this.RedirectToAction("Details", "Task", new { taskId = taskId, todoListId = todoListId });
     }
 }

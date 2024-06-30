@@ -21,9 +21,9 @@ public class TodoListController : Controller
 
     public TodoListController(ITodoListApi todoListApi, IMapper mapper, ILogger<TodoListController> logger)
     {
-        _logger = logger;
-        _todoListApi = todoListApi;
-        _mapper = mapper;
+        this._logger = logger;
+        this._todoListApi = todoListApi;
+        this._mapper = mapper;
     }
 
     [HttpGet("todo")]
@@ -31,40 +31,43 @@ public class TodoListController : Controller
     {
         try
         {
-            var todoLists = await _todoListApi.GetAllTodoLists();
-            var todoListWebApiModel = _mapper.Map<List<TodoListWebApiModel>>(todoLists);
-            return View(todoListWebApiModel);
+            var todoLists = await this._todoListApi.GetAllTodoLists();
+            var todoListWebApiModel = this._mapper.Map<List<TodoListWebApiModel>>(todoLists);
+            return this.View(todoListWebApiModel);
         }
         catch (ApiException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                _logger.LogWarning(ex, "No todo lists found.");
-                return View(new List<TodoListWebApiModel>()); // Return an empty list
+                this._logger.LogWarning(ex, "No todo lists found.");
+                return this.View(new List<TodoListWebApiModel>()); // Return an empty list
             }
             else
             {
-                _logger.LogError(ex, "API error while fetching todo lists.");
-                return View("Error",
+                this._logger.LogError(ex, "API error while fetching todo lists.");
+                return this.View(
+                    "Error",
                     new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogError(ex, "Task was canceled while fetching todo lists.");
-            return View("Error",
+            this._logger.LogError(ex, "Task was canceled while fetching todo lists.");
+            return this.View("Error",
                 new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
         catch (JsonSerializationException ex)
         {
-            _logger.LogError(ex, "Error deserializing todo list data.");
-            return View("Error",
+            this._logger.LogError(ex, "Error deserializing todo list data.");
+            return this.View(
+                "Error",
                 new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
         catch (AggregateException ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while fetching todo lists: {ErrorMessage}", ex.Message);
-            return View("Error",
+            this._logger.LogError(ex, "An unexpected error occurred while fetching todo lists: {ErrorMessage}", ex.Message);
+            return this.View(
+                "Error",
                 new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
@@ -75,7 +78,7 @@ public class TodoListController : Controller
     {
         if (!User.Identity.IsAuthenticated)
         {
-            return Redirect("/Identity/Account/Login?ReturnUrl=%2F");
+            return this.Redirect("/Identity/Account/Login?ReturnUrl=%2F");
         }
 
         var model = new TodoListWebApiModel
@@ -83,7 +86,7 @@ public class TodoListController : Controller
             Tasks = new List<TodoTaskDto> { new TodoTaskDto() },
         };
 
-        return View(model);
+        return this.View(model);
     }
 
 
@@ -151,7 +154,11 @@ public class TodoListController : Controller
         }
         catch (ApiException ex)
         {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
+            if (ex.StatusCode == HttpStatusCode.Forbidden)
+            {
+                TempData["ErrorMessage"] = "You do not have permission to delete this todo list.";
+            }
+            else if (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 TempData["ErrorMessage"] = "Todo list not found.";
             }

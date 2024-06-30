@@ -2,7 +2,7 @@
 
 namespace TodoListApp.WebApp.Interfaces;
 
-public interface  IJwtTokenGenerator
+public interface IJwtTokenGenerator
 {
     Task<string> GenerateToken(ClaimsPrincipal user);
 }

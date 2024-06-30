@@ -8,19 +8,19 @@ using TodoListApp.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.ConfigureDbContext(builder.Configuration.GetConnectionString("ToDoListConnection"));
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy  =>
+    options.AddPolicy(
+        name: myAllowSpecificOrigins,
+        policy =>
         {
-            policy.WithOrigins("https://localhost:7171") // Add your MVC app's origin here
+            policy.WithOrigins("https://localhost:7171")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -38,7 +38,6 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -49,11 +48,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(myAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
 SeedData.EnsurePopulated(app);
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(myAllowSpecificOrigins);
 app.Run();

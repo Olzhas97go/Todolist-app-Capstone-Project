@@ -18,74 +18,74 @@ public class TagController : ControllerBase
 
     public TagController(ITagService service, ILogger<TodoListController> logger, TodoListDbContext context, IMapper mapper)
     {
-        _mapper = mapper;
-        _context = context;
-        _service = service;
-        _logger = logger;
+        this._mapper = mapper;
+        this._context = context;
+        this._service = service;
+        this._logger = logger;
     }
 
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<TagDto>>> GetAll()
     {
-        var result = await _service.GetAllAsync();
-        return Ok(result);
+        var result = await this._service.GetAllAsync();
+        return this.Ok(result);
     }
 
     [HttpGet("tasks/{tagText}")]
     public async Task<ActionResult<IEnumerable<TodoTaskDto>>> GetTasksByTag(string tagText)
     {
-        var result = await _service.GetTasksByTagAsync(tagText);
-        return Ok(result);
+        var result = await this._service.GetTasksByTagAsync(tagText);
+        return this.Ok(result);
     }
 
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TagDto>> GetById(int id)
     {
-        var result = await _service.GetByIdAsync(id);
+        var result = await this._service.GetByIdAsync(id);
         if (result == null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(result);
+        return this.Ok(result);
     }
 
     [HttpPost("create")]
     public async Task<ActionResult<TagDto>> Create(TagDto dto)
     {
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return this.BadRequest(this.ModelState);
         }
 
         // Check if the task exists
         if (!await _context.Tasks.AnyAsync(t => t.Id == dto.TaskId))
         {
-            return BadRequest("Invalid TaskId. The task does not exist.");
+            return this.BadRequest("Invalid TaskId. The task does not exist.");
         }
 
-        var result = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        var result = await this._service.CreateAsync(dto);
+        return this.CreatedAtAction(nameof(this.GetById), new { id = result.Id }, result);
     }
-    //
+
     [HttpPut("{id}")]
     public async Task<ActionResult<TagDto>> Update(int id, TagDto dto)
     {
-        var result = await _service.UpdateAsync(id, dto);
+        var result = await this._service.UpdateAsync(id, dto);
         if (result == null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(result);
+        return this.Ok(result);
     }
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
-        return NoContent();
+        await this._service.DeleteAsync(id);
+        return this.NoContent();
     }
 
     [HttpGet("task/{taskId}")]
@@ -93,13 +93,12 @@ public class TagController : ControllerBase
     {
         try
         {
-            var tagDtos = await _context.Tags.Where(t => t.TaskId == taskId).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<TagDto>>(tagDtos)); // Map to DTOs (if needed)
+            var tagDtos = await this._context.Tags.Where(t => t.TaskId == taskId).ToListAsync();
+            return this.Ok(this._mapper.Map<IEnumerable<TagDto>>(tagDtos)); // Map to DTOs (if needed)
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while getting tags for task {TaskId}.", taskId);
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 }

@@ -10,39 +10,36 @@ using TodoListApp.WebApp.Models.TaskModels;
 namespace TodoListApp.WebApp.Controllers;
 public class TagController : Controller
 {
-    private readonly ITodoListApi _todoListApi; // Refit interface
+    private readonly ITodoListApi _todoListApi;
     private readonly IMapper _mapper;
-    private readonly ILogger<TagController> _logger;
 
 
-    public TagController(ITodoListApi todoListApi, IMapper mapper, ILogger<TagController> logger)
+    public TagController(ITodoListApi todoListApi, IMapper mapper)
     {
-        _logger = logger;
         _mapper = mapper;
         _todoListApi = todoListApi;
     }
 
     public async Task<IActionResult> TasksByTag(string tagText)
     {
-        var tasksByTagDto = await _todoListApi.GetTasksByTagAsync(tagText);
+        var tasksByTagDto = await this._todoListApi.GetTasksByTagAsync(tagText);
 
         if (tasksByTagDto.IsSuccessStatusCode && tasksByTagDto.Content != null)
         {
-            var tasksByTagViewModel = _mapper.Map<IEnumerable<TodoTaskViewModel>>(tasksByTagDto.Content);
+            var tasksByTagViewModel = this._mapper.Map<IEnumerable<TodoTaskViewModel>>(tasksByTagDto.Content);
 
-            ViewData["TagText"] = tagText;
+            this.ViewData["TagText"] = tagText;
 
             if (!tasksByTagViewModel.Any())
             {
-                ViewData["Message"] = $"No tasks found with the tag '{tagText}'.";
-                return View("NotFound");
+                this.ViewData["Message"] = $"No tasks found with the tag '{tagText}'.";
+                return this.View("NotFound");
             }
 
-            return View(tasksByTagViewModel);
+            return this.View(tasksByTagViewModel);
         }
 
-        // Handle errors
-        return View("Error");
+        return this.View("Error");
     }
 
     [HttpPost]
@@ -50,26 +47,24 @@ public class TagController : Controller
     {
         if (!ModelState.IsValid)
         {
-            // Fetch the task details to pass it back to the TaskEdit view
-            var task = await _todoListApi.GetTaskByIdAsync(model.TaskId);
-            var taskModel = _mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(task);
+            var task = await this._todoListApi.GetTaskByIdAsync(model.TaskId);
+            var taskModel = this._mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(task);
 
-            return View("TaskEdit", taskModel);
+            return this.View("TaskEdit", taskModel);
         }
 
-        var tagDto = _mapper.Map<TagDto>(model);
+        var tagDto = this._mapper.Map<TagDto>(model);
         var result = await this._todoListApi.CreateTagAsync(tagDto);
 
         if (!result.IsSuccessStatusCode)
         {
-            // Handle errors, e.g., display an error message or log the error
-            // You may also return the TaskEdit view with the task details and show an error message
         }
         else
         {
-            TempData["TagAddedSuccessfully"] = true;
+            this.TempData["TagAddedSuccessfully"] = true;
         }
-        return RedirectToAction("EditTask", "Task", new { taskId = model.TaskId });
+
+        return this.RedirectToAction("EditTask", "Task", new { taskId = model.TaskId });
     }
 
     // [HttpPost]

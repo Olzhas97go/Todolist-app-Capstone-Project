@@ -28,7 +28,7 @@ public class TodoListDbContext : DbContext
             .WithOne(t => t.TodoList)
             .HasForeignKey(t => t.TodoListId);
 
-        modelBuilder.Entity<TaskEntity>() // Add this if you haven't already
+        modelBuilder.Entity<TaskEntity>()
             .HasOne<TodoListEntity>(t => t.TodoList)
             .WithMany(tl => tl.Tasks)
             .HasForeignKey(t => t.TodoListId);
@@ -38,9 +38,8 @@ public class TodoListDbContext : DbContext
             entity.HasKey(t => t.Id);
             entity.Property(t => t.Text).HasMaxLength(20);
 
-            // Define the relationship between TagEntity and TaskEntity
             entity.HasOne(t => t.Task)
-                .WithMany(t => t.Tags) // Assuming you have a 'Tags' collection in TaskEntity
+                .WithMany(t => t.Tags)
                 .HasForeignKey(t => t.TaskId);
         });
 
@@ -50,7 +49,6 @@ public class TodoListDbContext : DbContext
             entity.Property(c => c.Text).IsRequired(); // Text is required
             entity.Property(c => c.CreatedDate).IsRequired();
 
-            // Define the relationship with TaskEntity (Many-to-One)
             entity.HasOne(c => c.Task)
                 .WithMany(t => t.Comments) // TaskEntity should have a Comments collection
                 .HasForeignKey(c => c.TaskId);

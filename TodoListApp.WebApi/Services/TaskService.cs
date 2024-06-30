@@ -19,9 +19,9 @@ public class TaskService : ITaskService
 
     public TaskService(TodoListDbContext context, IMapper mapper, ILogger<TaskService> logger)
     {
-    _context = context;
-    _mapper = mapper;
-    _logger = logger;
+        this._context = context;
+        this._mapper = mapper;
+        this._logger = logger;
     }
 
 
@@ -29,13 +29,12 @@ public class TaskService : ITaskService
     {
         try
         {
-            var taskEntities = await _context.Tasks
+            var taskEntities = await this._context.Tasks
                 .Where(t => t.TodoListId == todoListId)
                 .ToListAsync();
 
-            var taskModels = _mapper.Map<List<TodoTask>>(taskEntities);
+            var taskModels = this._mapper.Map<List<TodoTask>>(taskEntities);
 
-            // Determine if a task is overdue and set IsOverdue property
             foreach (var task in taskModels)
             {
                 task.IsOverdue = task.DueDate.HasValue && task.DueDate.Value < DateTime.Now;
@@ -45,7 +44,6 @@ public class TaskService : ITaskService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving tasks for todo list with ID {todoListId}.", todoListId);
             throw;
         }
     }
@@ -54,51 +52,37 @@ public class TaskService : ITaskService
     {
         try
         {
-            var taskEntity = await _context.Tasks.FindAsync(taskId);
+            var taskEntity = await this._context.Tasks.FindAsync(taskId);
             if (taskEntity == null)
             {
-                return null; // Task not found
+                return null;
             }
 
-            var taskModel = _mapper.Map<TodoTask>(taskEntity);
+            var taskModel = this._mapper.Map<TodoTask>(taskEntity);
             taskModel.IsOverdue = taskModel.DueDate.HasValue && taskModel.DueDate < DateTime.Now;
             return taskModel;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving task with ID {taskId}.", taskId);
-            throw; // Rethrow the exception to be handled in the controller
+            throw;
         }
     }
 
     public async Task<TodoTask> AddTaskAsync(TaskEntity taskEntity)
     {
-        // 1. Validate TodoListId:
-        var todoListExists = await _context.TodoLists.AnyAsync(tl => tl.Id == taskEntity.TodoListId);
+        var todoListExists = await this._context.TodoLists.AnyAsync(tl => tl.Id == taskEntity.TodoListId);
 
         if (!todoListExists)
         {
             throw new ArgumentException($"Todo list with ID {taskEntity.TodoListId} not found.");
         }
 
-        // 2. Other Validations (Optional):
-        // - You might have additional validation rules for your task, such as:
-        //   - Required fields (e.g., Title)
-        //   - Maximum length constraints
-        //   - Custom business logic
+        taskEntity.CreatedDate = DateTime.UtcNow;
 
-        // 3. Set Additional Properties (if needed):
-        taskEntity.CreatedDate = DateTime.UtcNow; // Set the current UTC time
+        this._context.Tasks.Add(taskEntity);
+        await this._context.SaveChangesAsync();
 
-        // 4. Add to Database:
-        _context.Tasks.Add(taskEntity);
-        await _context.SaveChangesAsync();
-
-        // 5. Logging (Optional):
-        _logger.LogInformation("Created task with ID {TaskId} for user {UserId}", taskEntity.Id, taskEntity.UserId);
-
-        // 6. Return Result:
-        return _mapper.Map<TodoTask>(taskEntity); // Map back to TodoTask using AutoMapper
+        return this._mapper.Map<TodoTask>(taskEntity);
     }
 
 
@@ -106,20 +90,19 @@ public class TaskService : ITaskService
     {
         try
         {
-            var taskEntity = await _context.Tasks.FindAsync(taskId);
+            var taskEntity = await this._context.Tasks.FindAsync(taskId);
             if (taskEntity == null)
             {
-                return false; // Task not found
+                return false;
             }
 
-            _context.Tasks.Remove(taskEntity);
-            await _context.SaveChangesAsync();
+            this._context.Tasks.Remove(taskEntity);
+            await this._context.SaveChangesAsync();
 
-            return true; // Task deleted successfully
+            return true;
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "An error occurred while deleting task with ID {taskId}.", taskId);
             throw new Exception("An error occurred while deleting the task.", ex);
         }
     }
@@ -128,71 +111,54 @@ public class TaskService : ITaskService
     {
         try
         {
-            // 1. Check if the Task exists
-            var existingTask = await _context.Tasks.FindAsync(taskId);
+            var existingTask = await this._context.Tasks.FindAsync(taskId);
             if (existingTask == null)
             {
                 throw new ArgumentException($"Task with ID {taskId} not found.");
             }
 
-            // 2. Check concurrency token
+            this._mapper.Map(updatedTodoTask, existingTask);
 
-            // 3. Map the updated TodoTask to TaskEntity
-            _mapper.Map(updatedTodoTask, existingTask); // Use AutoMapper
-
-            // 4. Save changes to the database
             try
             {
-                await _context.SaveChangesAsync();
-                return _mapper.Map<TodoTask>(existingTask);
+                await this._context.SaveChangesAsync();
+                return this._mapper.Map<TodoTask>(existingTask);
             }
             catch (DbUpdateConcurrencyException)
             {
-                // Reload the task to get the latest version
-                _context.Entry(existingTask).Reload();
+                this._context.Entry(existingTask).Reload();
 
-                // Map the updated values (except RowVersion) to the reloaded entity
-                _mapper.Map(updatedTodoTask, existingTask);
+                this._mapper.Map(updatedTodoTask, existingTask);
 
-                // Retry saving changes
-                await _context.SaveChangesAsync();
+                await this._context.SaveChangesAsync();
 
-                return _mapper.Map<TodoTask>(existingTask);
+                return this._mapper.Map<TodoTask>(existingTask);
             }
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Invalid input while updating a task.");
-            throw; // Rethrow the ArgumentException to be handled by the controller.
+            throw;
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "An error occurred while updating the task in the database.");
-            throw new Exception("An error occurred while updating the task.", ex); // Throw a more general exception with a custom message.
+            throw new Exception("An error occurred while updating the task.", ex);
         }
     }
 
     public async Task<TodoTask> UpdateTaskStatusAsync(int todoListId, int taskId, ToDoTaskStatus newStatus)
     {
-        // 1. Get the user ID from the token claims (same as in your TodoListController)
-
-        // 2. Retrieve the task from the database
-        var taskEntity = await _context.Tasks
+        var taskEntity = await this._context.Tasks
             .Where(t => t.TodoListId == todoListId && t.Id == taskId)
             .FirstOrDefaultAsync();
 
-        // 3. Authorization check: Verify if the user owns the task
-        // ... (same as before)
-
-        // 4. Update the task status and save changes
         taskEntity.Status = newStatus;
-        await _context.SaveChangesAsync();
-        return _mapper.Map<TodoTask>(taskEntity); // Use AutoMapper to map
+        await this._context.SaveChangesAsync();
+        return this._mapper.Map<TodoTask>(taskEntity);
     }
 
     public List<TodoListModel> GetTasksForUser(string userId, ToDoTaskStatus? status = null, string sortBy = "Name", string sortOrder = "asc")
     {
-        var query = _context.Tasks.Where(t => t.UserId == userId);
+        var query = this._context.Tasks.Where(t => t.UserId == userId);
 
         if (status.HasValue)
         {
@@ -209,7 +175,6 @@ public class TaskService : ITaskService
                 query = sortOrder == "desc" ? query.OrderByDescending(t => t.DueDate) : query.OrderBy(t => t.DueDate);
                 break;
             default:
-                // Default sorting (by Name ascending) or throw an exception for invalid input
                 query = query.OrderBy(t => t.Title);
                 break;
         }
@@ -221,10 +186,10 @@ public class TaskService : ITaskService
 
     public async Task<IEnumerable<TodoTask>> SearchByTitleAsync(string title)
     {
-        var tasks = await _context.Tasks
+        var tasks = await this._context.Tasks
             .Where(t => EF.Functions.Like(t.Title, $"%{title}%"))
             .ToListAsync();
 
-        return _mapper.Map<IEnumerable<TodoTask>>(tasks);
+        return this._mapper.Map<IEnumerable<TodoTask>>(tasks);
     }
 }

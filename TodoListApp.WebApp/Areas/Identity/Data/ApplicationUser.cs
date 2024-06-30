@@ -19,10 +19,7 @@ public class ApplicationUser : IdentityUser
     [PersonalData]
     [Column(TypeName = "nvarchar(100)")]
     public string LastName { get; set; } = null!;
-    public UserRoles  Role { get; set; }
-    public async Task<string> GetUserId(ClaimsPrincipal user)
-    {
-        return await Task.FromResult(this.Id); // Or however you retrieve the user ID
-    }
+
+    public UserRoles Role { get; set; }
 }
 

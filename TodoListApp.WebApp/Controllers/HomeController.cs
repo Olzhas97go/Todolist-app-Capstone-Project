@@ -12,30 +12,28 @@ namespace TodoListApp.WebApp.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
-        _logger = logger;
     }
 
-     [Authorize]
-     public IActionResult Index()
+    [Authorize]
+    public IActionResult Index()
     {
-        ViewData["UserID"]=_userManager.GetUserId(this.User);
-        return View();
+        this.ViewData["UserID"] = this._userManager.GetUserId(this.User);
+        return this.View();
     }
 
     public IActionResult Privacy()
     {
-        return View();
+        return this.View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
     }
 }

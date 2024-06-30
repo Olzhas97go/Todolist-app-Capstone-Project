@@ -17,26 +17,25 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 
     public TodoListDatabaseService(TodoListDbContext context, ILogger<TodoListDatabaseService> logger, IMapper mapper)
     {
-        _context = context;
-        _logger = logger;
-        _mapper = mapper;
+        this._context = context;
+        this._logger = logger;
+        this._mapper = mapper;
     }
 
     public async Task<bool> TodoListExists(int id)
     {
-        return await _context.TodoLists.AnyAsync(e => e.Id == id);
+        return await this._context.TodoLists.AnyAsync(e => e.Id == id);
     }
 
     public async Task<List<TodoListModel>> GetAllTodoListsAsync()
     {
         try
         {
-            var entities = await _context.TodoLists.ToListAsync(); // Query the DbSet
-            return _mapper.Map<List<TodoListModel>>(entities);
+            var entities = await this._context.TodoLists.ToListAsync(); // Query the DbSet
+            return this._mapper.Map<List<TodoListModel>>(entities);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving todo lists.");
             throw new Exception("An error occurred while retrieving todo lists.", ex);
         }
     }
@@ -52,7 +51,6 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 
             var todoListEntity = _mapper.Map<TodoListEntity>(newTodoListDto);
 
-            // Убедитесь, что идентификатор не установлен вручную
             todoListEntity.Id = 0;
 
             _context.TodoLists.Add(todoListEntity);
@@ -62,12 +60,10 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Invalid input while creating a todo list.");
             throw;
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "An error occurred while creating a todo list.");
             throw new Exception("An error occurred while saving the data.", ex);
         }
     }
@@ -76,36 +72,33 @@ public class TodoListDatabaseService : ITodoListDatabaseService
     {
         try
         {
-            var todoList = await _context.TodoLists.FindAsync(id);
+            var todoList = await this._context.TodoLists.FindAsync(id);
             if (todoList == null)
             {
-                return false; // Not found
+                return false;
             }
 
-            _context.TodoLists.Remove(todoList);
-            await _context.SaveChangesAsync();
-            return true; // Successfully deleted
+            this._context.TodoLists.Remove(todoList);
+            await this._context.SaveChangesAsync();
+            return true;
         }
         catch (DbUpdateException ex)
         {
-            _logger?.LogError(ex, "An error occurred while deleting a todo list with ID {Id}", id);
-            throw; // Let the controller handle the exception
+            throw;
         }
     }
 
     public async Task<TodoListEntity> UpdateTodoListAsync(int id, TodoListEntity todoList)
     {
-        var existingTodoList = await _context.TodoLists.FindAsync(id);
+        var existingTodoList = await this._context.TodoLists.FindAsync(id);
         if (existingTodoList == null)
         {
             return null;
         }
 
-        existingTodoList.Name = todoList.Name; // Update reference
-        existingTodoList.Description = todoList.Description; // Update reference
+        existingTodoList.Name = todoList.Name;
+        existingTodoList.Description = todoList.Description;
 
-
-        // ... (update other properties as needed)
 
         try
         {
@@ -123,12 +116,12 @@ public class TodoListDatabaseService : ITodoListDatabaseService
     public async Task<TodoListEntity> GetTodoListByIdAsync(int id)
     {
         var todoListEntity = await _context.TodoLists
-            .Include(tl => tl.Tasks) // Eager loading
+            .Include(tl => tl.Tasks)
             .FirstOrDefaultAsync(tl => tl.Id == id);
 
         if (todoListEntity == null)
         {
-            return null;  // Return null if no to-do list is found
+            return null;
         }
         return todoListEntity;
     }

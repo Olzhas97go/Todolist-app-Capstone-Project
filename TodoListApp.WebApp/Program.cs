@@ -21,7 +21,7 @@ var mapperConfig = new MapperConfiguration(mc =>
     mc.AddProfile(new MappingProfile());
 });
 IMapper mapper = mapperConfig.CreateMapper();
-mapperConfig.AssertConfigurationIsValid(); // This will throw an exception if there are any configuration errors.
+mapperConfig.AssertConfigurationIsValid();
 builder.Services.AddDbContext<WebAppContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -41,7 +41,7 @@ builder.Services.AddAuthentication()
         options.LoginPath = "/Identity/Account/Login/";
         options.AccessDeniedPath = "/Identity/Account/Login/";
     })
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>  // Name the scheme "Bearer"
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -50,27 +50,24 @@ builder.Services.AddAuthentication()
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Issuer"], // Same as issuer for your scenario
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:TokenSigningKey"]))
+            ValidAudience = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:TokenSigningKey"])),
         };
     });
-builder.Services.AddDistributedMemoryCache(); // Use in-memory cache for session (simplest option)
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
-    options.Cookie.HttpOnly = true; // Important for security
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
- // Replace with your actual Web API base URL
-builder.Services.AddAutoMapper(typeof(MappingProfile)); // Update the namespace accordingly
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 builder.Services.AddScoped<HttpClient>();
-builder.Services.AddScoped<ITodoListWebApiService, TodoListWebApiService>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddScoped<JwtConfiguration>();
-builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtProvider>();
 builder.Services.AddScoped<IApiHeaderService, ApiHeaderService>();
 builder.Services.AddTransient<TokenDelegatingHandler>();
@@ -79,7 +76,7 @@ builder.Services.AddRefitClient<ITodoListApi>()
     .ConfigureHttpClient(c =>
     {
         c.BaseAddress = new Uri(builder.Configuration["ApiSettings:TodoListApiBaseUrl"]);
-        c.Timeout = TimeSpan.FromSeconds(30); // Example of a custom timeout
+        c.Timeout = TimeSpan.FromSeconds(30);
     })
     .AddHttpMessageHandler<TokenDelegatingHandler>();
 builder.Services.AddRazorPages();
@@ -96,11 +93,9 @@ var app = builder.Build();
 
 
 app.UseCors("AllowAnyOrigin");
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

@@ -9,6 +9,7 @@ namespace TodoListApp.WebApp.Models.TaskModels
     {
         [Required]
         public int TodoListId { get; set; }
+
         public string TodoListName { get; set; }
 
 
@@ -23,8 +24,11 @@ namespace TodoListApp.WebApp.Models.TaskModels
         [Display(Name = "Due Date")]
         [DataType(DataType.Date)]
         public DateTime DueDate { get; set; } = DateTime.UtcNow;
+
         public TodoListDetailsDto TodoList { get; set; }
+
         public string UserId { get; set; } = string.Empty; // Change the type to string
+
         public List<TagDto> Tags { get; set; } = new List<TagDto>();
 
     }

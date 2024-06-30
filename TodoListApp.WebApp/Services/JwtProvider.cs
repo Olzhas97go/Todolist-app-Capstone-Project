@@ -8,23 +8,14 @@ using TodoListApp.WebApp.Interfaces;
 
 namespace TodoListApp.WebApp.Services;
 
-public class JwtProvider : IJwtProvider, IJwtTokenGenerator
+public class JwtProvider : IJwtTokenGenerator
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _config;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConfiguration _configuration;
 
     public JwtProvider(
-        UserManager<ApplicationUser> userManager,
-        IConfiguration config,
-        IHttpContextAccessor httpContextAccessor,
-        IConfiguration configuration)
+        IConfiguration config)
     {
-        _userManager = userManager;
         _config = config;
-        _httpContextAccessor = httpContextAccessor;
-        this._configuration = _configuration;
     }
 
     public async Task<string> GenerateToken(ClaimsPrincipal user)
@@ -34,21 +25,19 @@ public class JwtProvider : IJwtProvider, IJwtTokenGenerator
         {
             throw new InvalidOperationException("User does not have an email.");
         }
-        var email = emailClaim.Value; // Get the email value from the claim
+        var email = emailClaim.Value;
 
         var nameIdentifierClaim = user.FindFirst(ClaimTypes.NameIdentifier);
         if (nameIdentifierClaim == null || string.IsNullOrEmpty(nameIdentifierClaim.Value))
         {
             throw new InvalidOperationException("User does not have an Id.");
         }
-        var userId = nameIdentifierClaim.Value; // Get the user ID value from the claim
+        var userId = nameIdentifierClaim.Value;
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Role, "Owner")
-            // Add other relevant claims here if needed
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -61,8 +50,8 @@ public class JwtProvider : IJwtProvider, IJwtTokenGenerator
             Subject = new ClaimsIdentity(claims),
             Expires = expires,
             SigningCredentials = creds,
-            Issuer = _configuration["Jwt:ValidIssuer"],
-            Audience = _configuration["Jwt:ValidAudience"]
+            Issuer = this._config["Jwt:ValidIssuer"],
+            Audience = this._config["Jwt:ValidAudience"],
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);

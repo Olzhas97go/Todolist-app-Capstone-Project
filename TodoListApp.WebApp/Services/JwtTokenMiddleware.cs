@@ -5,25 +5,23 @@ namespace TodoListApp.WebApp.Services;
 public class JwtTokenMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IServiceProvider _serviceProvider; // Inject IServiceProvider
+    private readonly IServiceProvider _serviceProvider;
 
     public JwtTokenMiddleware(RequestDelegate next, IServiceProvider serviceProvider)
     {
-        _next = next;
-        _serviceProvider = serviceProvider;
+        this._next = next;
+        this._serviceProvider = serviceProvider;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Create a new scope within each request.
-        using (var scope = _serviceProvider.CreateScope())
+        using (var scope = this._serviceProvider.CreateScope())
         {
             var apiHeaderService = scope.ServiceProvider.GetRequiredService<IApiHeaderService>();
-            // Use apiHeaderService here
             await apiHeaderService.AddJwtAuthorizationHeader(context);
         }
 
-        await _next(context);
+        await this._next(context);
     }
 }
 

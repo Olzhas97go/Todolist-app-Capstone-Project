@@ -13,6 +13,7 @@ public class TaskEntity
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = "No description";
+
     public ToDoTaskStatus Status { get; set; }
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -24,7 +25,6 @@ public class TaskEntity
 
     public bool IsCompleted { get; set; }
 
-    // Relationship with TodoListEntity
     [ForeignKey("TodoListDto")]
     public int TodoListId { get; set; }
 
@@ -35,6 +35,8 @@ public class TaskEntity
     public byte[] RowVersion { get; set; } = null!;
 
     public string UserId { get; set; } = string.Empty;
+
     public List<TagEntity> Tags { get; set; } = new List<TagEntity>();
+
     public List<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 }

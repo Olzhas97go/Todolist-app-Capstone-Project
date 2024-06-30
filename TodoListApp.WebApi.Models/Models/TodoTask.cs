@@ -12,6 +12,7 @@ public class TodoTask
     public string Title { get; set; }
 
     public string? Description { get; set; }
+
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     public DateTime? DueDate { get; set; } = DateTime.UtcNow;
@@ -21,7 +22,9 @@ public class TodoTask
     public int TodoListId { get; set; }
 
     public bool IsOverdue { get; set; }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ToDoTaskStatus Status { get; set; }
+
     public string UserId { get; set; } = string.Empty;
 }

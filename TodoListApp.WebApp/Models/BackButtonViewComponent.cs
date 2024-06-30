@@ -6,7 +6,7 @@ public class BackButtonViewComponent : ViewComponent
 
     public BackButtonViewComponent(IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor = httpContextAccessor;
+        this._httpContextAccessor = httpContextAccessor;
     }
 
     public IViewComponentResult Invoke()
@@ -15,10 +15,10 @@ public class BackButtonViewComponent : ViewComponent
 
         if (!string.IsNullOrEmpty(source) && source.ToLower() == "mytasks")
         {
-            return View(new BackButtonViewModel
+            return this.View(new BackButtonViewModel
             {
                 ActionName = "MyTasks",
-                ButtonText = "Back to My Tasks"
+                ButtonText = "Back to My Tasks",
             });
         }
         else
@@ -26,23 +26,24 @@ public class BackButtonViewComponent : ViewComponent
             string todoListId = _httpContextAccessor.HttpContext?.Request?.Query["todoListId"];
             if (string.IsNullOrEmpty(todoListId))
             {
-                return Content("Error: Missing todoListId."); // Or handle the error differently
+                return this.Content("Error: Missing todoListId."); // Or handle the error differently
             }
 
-            return View(new BackButtonViewModel
+            return this.View(new BackButtonViewModel
             {
                 ActionName = "ViewTasks",
                 ButtonText = "Back to Tasks",
-                TodoListId = todoListId
+                TodoListId = todoListId,
             });
         }
     }
 }
 
-// BackButtonViewModel (no changes)
 public class BackButtonViewModel
 {
     public string ActionName { get; set; }
+
     public string ButtonText { get; set; }
+
     public string TodoListId { get; set; }
 }

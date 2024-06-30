@@ -18,16 +18,13 @@ public class TodoListController : ControllerBase
 {
     private readonly ITodoListDatabaseService  _service;
     private readonly IMapper _mapper;
-    private readonly TodoListDbContext _context;
-    private readonly ILogger<TodoListController> _logger;
 
-    public TodoListController(ITodoListDatabaseService  service, IMapper mapper, TodoListDbContext context, ILogger<TodoListController> logger)
+    public TodoListController(ITodoListDatabaseService  service, IMapper mapper)
     {
-        _logger = logger;
-        _context = context;
-        _service = service;
-        _mapper = mapper;
+        this._service = service;
+        this._mapper = mapper;
     }
+
 
     [HttpGet]
     [Authorize]
@@ -36,44 +33,38 @@ public class TodoListController : ControllerBase
         try
         {
             var todoListEntities = await _service.GetAllTodoListsAsync();
-            var todoListModels = _mapper.Map<List<TodoListModel>>(todoListEntities);
-            return Ok(todoListModels);
+            var todoListModels = this._mapper.Map<List<TodoListModel>>(todoListEntities);
+            return this.Ok(todoListModels);
         }
         catch (Exception ex)
         {
             // Логирование исключения
-            return StatusCode(500, "An error occurred while retrieving todo lists.");
+            return this.StatusCode(500, "An error occurred while retrieving todo lists.");
         }
     }
 
     [HttpPost]
-    [Authorize(Policy = "OwnerPolicy")]
+    [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult<TodoListDto>> CreateTodoList([FromBody] TodoListDto todoListDto)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); // Return model validation errors
+            return this.BadRequest(this.ModelState); // Return model validation errors
         }
 
         try
         {
-            _logger.LogInformation("Received request to create todo list: {@todoListDto}", todoListDto);
-
             var createdTodoList = await _service.CreateTodoListAsync(todoListDto);
 
-            _logger.LogInformation("Returning response with status code 201 (Created): {createdTodoList}", createdTodoList);
-
-            return CreatedAtAction(nameof(GetAllTodoLists), new { id = createdTodoList.Id }, createdTodoList); // Return createdTodoList directly
+            return CreatedAtAction(nameof(this.GetAllTodoLists), new { id = createdTodoList.Id }, createdTodoList); // Return createdTodoList directly
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Invalid argument when creating todo list: {ErrorMessage}", ex.Message);
-            return BadRequest(new { Error = ex.Message });
+            return this.BadRequest(new { Error = ex.Message });
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Database error while creating todo list");
-            return StatusCode(500, new { Error = "An error occurred while creating the todo list." });
+            return this.StatusCode(500, new { Error = "An error occurred while creating the todo list." });
         }
     }
 
@@ -89,14 +80,14 @@ public class TodoListController : ControllerBase
             var wasDeleted = await this._service.DeleteTodoListAsync(id);
             if (!wasDeleted)
             {
-                return NotFound(); // Return 404 if the todo list doesn't exist
+                return this.NotFound();
             }
-            return NoContent(); // Return 204 No Content on successful deletion
+            return this.NoContent();
         }
         catch (Exception ex)
         {
             // Log the exception
-            return StatusCode(500, new { Error = "An error occurred while deleting the todo list." });
+            return this.StatusCode(500, new { Error = "An error occurred while deleting the todo list." });
         }
     }
 
@@ -106,7 +97,7 @@ public class TodoListController : ControllerBase
     {
         if (id != todoListDto.Id)
         {
-            return BadRequest("The id in the URL does not match the id in the request body."); // Ensure IDs match
+            return this.BadRequest("The id in the URL does not match the id in the request body."); // Ensure IDs match
         }
 
         try
@@ -115,15 +106,15 @@ public class TodoListController : ControllerBase
             var todoList = await _service.UpdateTodoListAsync(id, todoListEntity); // Pass both id and entity
             if (todoList == null)
             {
-                return NotFound(); // Not found
+                return this.NotFound();
             }
-            return Ok(todoList); // Return the updated todo list
+            return this.Ok(todoList);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!await _service.TodoListExists(id))
+            if (!await this._service.TodoListExists(id))
             {
-                return NotFound();
+                return this.NotFound();
             }
             else
             {
@@ -133,7 +124,7 @@ public class TodoListController : ControllerBase
         catch (Exception ex)
         {
             // Log the exception
-            return StatusCode(500, "An error occurred while updating the todo list.");
+            return this.StatusCode(500, "An error occurred while updating the todo list.");
         }
     }
 
@@ -141,36 +132,30 @@ public class TodoListController : ControllerBase
     [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult> GetTodoListById(int id)
     {
-        var roleClaim = User.FindFirst(ClaimTypes.Role);
+        var roleClaim = this.User.FindFirst(ClaimTypes.Role);
         if (roleClaim != null)
         {
             var userRole = roleClaim.Value;
-            _logger.LogInformation("User role: {UserRole}", userRole);
         }
-        else
-        {
-            _logger.LogWarning("User role claim not found");
-        }
-        // 1. Verify Authorization (JWT Token)
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        var userIdClaim = this.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
         if (userIdClaim == null)
         {
-            _logger.LogWarning("Missing User ID claim in JWT token.");
-            return Unauthorized("Unauthorized access.");
+            return this.Unauthorized("Unauthorized access.");
         }
 
         var userId = userIdClaim.Value;
 
         // 2. Verify ID (Ownership)
-        var todoListEntity = await _service.GetTodoListByIdAsync(id);
+        var todoListEntity = await this._service.GetTodoListByIdAsync(id);
         if (todoListEntity == null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
         // 3. Map and Return
-        var todoListDetailsDto = _mapper.Map<TodoListDetailsDto>(todoListEntity);
-        return Ok(todoListDetailsDto);
+        var todoListDetailsDto = this._mapper.Map<TodoListDetailsDto>(todoListEntity);
+        return this.Ok(todoListDetailsDto);
     }
 }

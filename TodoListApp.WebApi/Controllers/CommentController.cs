@@ -3,61 +3,60 @@ using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Controllers;
+
 [ApiController]
 [Route("api/comment")]
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _service;
-    private readonly ILogger<TodoListController> _logger;
 
-    public CommentController(ICommentService service, ILogger<TodoListController> logger)
+    public CommentController(ICommentService service)
     {
-        _service = service;
-        _logger = logger;
+        this._service = service;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CommentDto>>> GetAll()
     {
-        var result = await _service.GetAllAsync();
+        var result = await this._service.GetAllAsync();
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CommentDto>> GetById(int id)
     {
-        var result = await _service.GetByIdAsync(id);
+        var result = await this._service.GetByIdAsync(id);
         if (result == null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(result);
+        return this.Ok(result);
     }
 
     [HttpPost]
     public async Task<ActionResult<CommentDto>> Create(CommentDto dto)
     {
-        var result = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        var result = await this._service.CreateAsync(dto);
+        return CreatedAtAction(nameof(this.GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<CommentDto>> Update(int id, CommentDto dto)
     {
-        var result = await _service.UpdateAsync(id, dto);
+        var result = await this._service.UpdateAsync(id, dto);
         if (result == null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(result);
+        return this.Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
-        return NoContent();
+        await this._service.DeleteAsync(id);
+        return this.NoContent();
     }
 }

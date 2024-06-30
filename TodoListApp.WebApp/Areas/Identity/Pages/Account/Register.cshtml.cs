@@ -36,26 +36,20 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-        private readonly IJwtProvider _jwtProvider;
-        private readonly IConfiguration _configuration;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender
-            ,IJwtProvider jwtProvider,
-            IConfiguration configuration)
+            IEmailSender emailSender)
         {
-            _configuration = configuration;
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
-            _jwtProvider = jwtProvider;
         }
 
         /// <summary>

@@ -24,10 +24,10 @@ public class TaskController : ControllerBase
 
     public TaskController(ITaskService taskService, ILogger<TaskController> logger, IMapper mapper, TodoListDbContext context)
     {
-        _taskService = taskService;
-        _logger = logger;
-        _mapper = mapper;
-        _context = context;
+        this._taskService = taskService;
+        this._logger = logger;
+        this._mapper = mapper;
+        this._context = context;
     }
 
 
@@ -35,8 +35,8 @@ public class TaskController : ControllerBase
     [Authorize(Roles = "Owner,Editor,Viewer")]
     public async Task<ActionResult<List<TodoTask>>> GetTasks(int todoListId)
     {
-        var tasks = await _taskService.GetTasksForTodoListAsync(todoListId);
-        return Ok(tasks);
+        var tasks = await this._taskService.GetTasksForTodoListAsync(todoListId);
+        return this.Ok(tasks);
     }
 
     [HttpPost("{todoListId}/tasks")] // POST /api/tasks/{todoListId}/tasks
@@ -45,15 +45,15 @@ public class TaskController : ControllerBase
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return this.BadRequest(this.ModelState);
             }
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = this.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
-                return Unauthorized("Invalid token: Missing User ID claim.");
+                return this.Unauthorized("Invalid token: Missing User ID claim.");
             }
 
             var taskEntity = new TaskEntity
@@ -66,20 +66,19 @@ public class TaskController : ControllerBase
                 UserId = userIdClaim.Value // Set the UserId on the entity
             };
 
-            var createdTask = await _taskService.AddTaskAsync(taskEntity); // Pass the entity to your service
+            var createdTask = await this._taskService.AddTaskAsync(taskEntity); // Pass the entity to your service
 
             if (createdTask == null)
             {
-                return NotFound(); // Or BadRequest if you want to signal an error
+                return this.NotFound(); // Or BadRequest if you want to signal an error
             }
             else
             {
-                return CreatedAtAction(nameof(GetTasks), new { todoListId = createdTask.TodoListId }, createdTask);
+                return this.CreatedAtAction(nameof(this.GetTasks), new { todoListId = createdTask.TodoListId }, createdTask);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating a task for todo list with ID {todoListId}.", todoListId);
             return StatusCode(500, "Internal server error");
         }
     }
@@ -91,16 +90,16 @@ public class TaskController : ControllerBase
     {
         try
         {
-            var task = await _taskService.GetTaskByIdAsync(taskId);
+            var task = await this._taskService.GetTaskByIdAsync(taskId);
             if (task == null)
             {
-                return NotFound("Task not found.");
+                return this.NotFound("Task not found.");
             }
 
-            var taskDto = _mapper.Map<TodoTaskDto>(task);
+            var taskDto = this._mapper.Map<TodoTaskDto>(task);
             taskDto.IsOverdue = task.IsOverdue;
 
-            if (User != null) // Check if User is not null
+            if (User != null)
             {
                 var userTimeZoneId = User.FindFirstValue("TimeZone") ?? "UTC";
                 var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
@@ -114,15 +113,13 @@ public class TaskController : ControllerBase
                 }
                 catch (TimeZoneNotFoundException ex)
                 {
-                    _logger.LogWarning(ex, "User's timezone not found, defaulting to UTC.");
                 }
             }
 
-            return Ok(taskDto);
+            return this.Ok(taskDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving task with ID {taskId}.", taskId);
             return StatusCode(500, "Internal server error");
         }
     }
@@ -135,28 +132,26 @@ public class TaskController : ControllerBase
     {
         if (taskId != updatedTodoTask.Id)
         {
-            return BadRequest("Task ID mismatch");
+            return this.BadRequest("Task ID mismatch");
         }
 
         try
         {
-           // var todoTask = _mapper.Map<TodoTask>(updatedTodoTask);
             var updated = await _taskService.UpdateTaskAsync(taskId, updatedTodoTask);
             if (updated == null)
             {
-                return NotFound(); // Task not found
+                return this.NotFound();
             }
 
-            return Ok(updated);
+            return this.Ok(updated);
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            return Conflict("The task has been updated by someone else. Please refresh and try again.");
+            return this.Conflict("The task has been updated by someone else. Please refresh and try again.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating task with ID {taskId}.", taskId);
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 
@@ -166,18 +161,17 @@ public class TaskController : ControllerBase
     {
         try
         {
-            var wasDeleted = await _taskService.DeleteTaskAsync(taskId);
+            var wasDeleted = await this._taskService.DeleteTaskAsync(taskId);
             if (!wasDeleted)
             {
-                return NotFound(); // Return 404 if the task doesn't exist
+                return this.NotFound(); // Return 404 if the task doesn't exist
             }
 
-            return NoContent(); // Return 204 No Content on successful deletion
+            return this.NoContent(); // Return 204 No Content on successful deletion
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while deleting task with ID {taskId}.", taskId);
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 
@@ -187,26 +181,25 @@ public class TaskController : ControllerBase
     public async Task<IActionResult> UpdateTaskStatus(int taskId, [FromBody] UpdateTaskStatusRequest request)
     {
         // Validate the request
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return this.BadRequest(this.ModelState);
         }
         try
         {
             // Update the task status using your _taskService
-            var updatedTask = await _taskService.UpdateTaskStatusAsync(request.TodoListId, taskId, request.NewStatus);
+            var updatedTask = await this._taskService.UpdateTaskStatusAsync(request.TodoListId, taskId, request.NewStatus);
             if (updatedTask == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             var updatedTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
-            return Ok(updatedTaskDto);
+            return this.Ok(updatedTaskDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating task status.");
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 
@@ -219,12 +212,12 @@ public class TaskController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
         {
-            return Unauthorized("Invalid token: Missing User ID claim.");
+            return this.Unauthorized("Invalid token: Missing User ID claim.");
         }
 
         var userId = userIdClaim.Value; // Remove the duplicate declaration of 'string userId'
 
-        var tasks = _context.Tasks.Where(t => t.UserId == userId).ToList();
+        var tasks = this._context.Tasks.Where(t => t.UserId == userId).ToList();
 
         if (status.HasValue)
         {
@@ -245,7 +238,7 @@ public class TaskController : ControllerBase
                 tasks = tasks.OrderBy(t => t.Title).ToList();
                 break;
         }
-        var taskDtos = _mapper.Map<List<TodoTaskDto>>(tasks);
+        var taskDtos = this._mapper.Map<List<TodoTaskDto>>(tasks);
         return Ok(taskDtos);
     }
 
@@ -254,20 +247,19 @@ public class TaskController : ControllerBase
     {
         try
         {
-            var tasks = await _taskService.SearchByTitleAsync(title);
-            var taskDtos = _mapper.Map<IEnumerable<TodoTaskDto>>(tasks);
+            var tasks = await this._taskService.SearchByTitleAsync(title);
+            var taskDtos = this._mapper.Map<IEnumerable<TodoTaskDto>>(tasks);
 
             if (!taskDtos.Any())
             {
-                return NotFound("No tasks found matching the search criteria.");
+                return this.NotFound("No tasks found matching the search criteria.");
             }
 
-            return Ok(taskDtos);
+            return this.Ok(taskDtos);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while searching for tasks.");
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 }

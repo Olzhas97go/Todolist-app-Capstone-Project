@@ -11,6 +11,7 @@ public class TodoListDto
     public string? Description { get; set; }
 
     public string UserId { get; set; } = string.Empty;
+
     public ToDoTaskStatus Status { get; set; }
 
     public List<TodoTaskDto> Tasks { get; set; } = new();

@@ -8,7 +8,6 @@ public class TaskDetailsViewModelTaskResolver : IValueResolver<TodoTaskDto, Task
 {
     public Task Resolve(TodoTaskDto source, TaskDetailsViewModel destination, Task destMember, ResolutionContext context)
     {
-        // Map the Task property using the existing mapping configuration
         return context.Mapper.Map<Task>(source);
     }
 }

@@ -21,7 +21,7 @@ namespace TodoListApp.WebApi.Data
                     context.Database.Migrate();
                 }
 
-                if (!context.TodoLists.Any()) // Check if data already exists
+                if (!context.TodoLists.Any())
                 {
                     var todoLists = new List<TodoListEntity>
                     {
@@ -66,7 +66,6 @@ namespace TodoListApp.WebApi.Data
             }
             catch (Exception ex)
             {
-                // Consider rethrowing or handling the exception appropriately.
             }
         }
     }
