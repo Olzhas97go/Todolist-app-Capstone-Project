@@ -29,15 +29,15 @@ public class LogoutModel : PageModel
         this._logger.LogInformation("User logged out.");
 
         // Clear the JWT cookie
-        Response.Cookies.Delete("jwtToken");
+        this.Response.Cookies.Delete("jwtToken");
 
         if (returnUrl != null)
         {
-            return LocalRedirect(returnUrl);
+            return this.LocalRedirect(returnUrl);
         }
         else
         {
-            return RedirectToPage();
+            return this.RedirectToPage();
         }
     }
 }

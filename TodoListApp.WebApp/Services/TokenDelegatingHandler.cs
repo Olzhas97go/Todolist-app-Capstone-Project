@@ -18,7 +18,7 @@ public class TokenDelegatingHandler : DelegatingHandler
     {
         var jwtCookieName = this._configuration["JwtCookieName"] ?? "jwtToken";
 
-        if (_httpContextAccessor.HttpContext?.Request.Cookies.TryGetValue(jwtCookieName, out var token) == true)
+        if (this._httpContextAccessor.HttpContext?.Request.Cookies.TryGetValue(jwtCookieName, out var token) == true)
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }

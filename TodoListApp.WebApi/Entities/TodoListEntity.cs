@@ -4,7 +4,6 @@ using TodoListApp.WebApi.Entities;
 
 namespace TodoListApp.WebApi.Entities;
 
-
 public class TodoListEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

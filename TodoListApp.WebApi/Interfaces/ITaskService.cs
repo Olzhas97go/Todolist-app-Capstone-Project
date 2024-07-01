@@ -4,8 +4,6 @@ using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Interfaces;
 
-
-
 public interface ITaskService
 {
     Task<List<TodoTask>> GetTasksForTodoListAsync(int todoListId);

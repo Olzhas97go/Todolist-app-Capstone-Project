@@ -1,13 +1,9 @@
-using System.Security.Claims;
 using System.Text;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Refit;
-using TodoListApp.WebApi.Services;
 using TodoListApp.WebApp.Areas.Identity.Data;
 using TodoListApp.WebApp.Data.TodoListApp;
 using TodoListApp.WebApp.Interfaces;
@@ -28,16 +24,17 @@ builder.Services.AddDbContext<WebAppContext>(options =>
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<WebAppContext>();
 
-
 var tokenSigningKey = builder.Configuration["Jwt:TokenSigningKey"];
 if (string.IsNullOrEmpty(tokenSigningKey))
 {
     throw new InvalidOperationException("JWT TokenSigningKey is not found in the configuration.");
 }
+
 var key = Encoding.ASCII.GetBytes(tokenSigningKey);
 
 builder.Services.AddAuthentication()
-    .AddCookie(options => {
+    .AddCookie(options =>
+    {
         options.LoginPath = "/Identity/Account/Login/";
         options.AccessDeniedPath = "/Identity/Account/Login/";
     })
@@ -90,7 +87,6 @@ builder.Services.AddCors(options =>
     });
 });
 var app = builder.Build();
-
 
 app.UseCors("AllowAnyOrigin");
 if (!app.Environment.IsDevelopment())

@@ -19,7 +19,6 @@ public class Task
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-
     public DateTime? CompletedAt { get; set; }
 
     public bool IsCompleted { get; set; } = false;

@@ -10,14 +10,12 @@ namespace TodoListApp.WebApi.Services;
     public class CommentService : ICommentService
     {
         private readonly TodoListDbContext _context;
-        private readonly ILogger<TaskService> _logger;
         private readonly IMapper _mapper;
 
-        public CommentService(TodoListDbContext context, ILogger<TaskService> logger, IMapper mapper)
+        public CommentService(TodoListDbContext context, IMapper mapper)
         {
             this._mapper = mapper;
             this._context = context;
-            this._logger = logger;
         }
 
         public async Task<IEnumerable<CommentDto>> GetAllAsync()
@@ -25,7 +23,6 @@ namespace TodoListApp.WebApi.Services;
             var entities = await this._context.Comments.ToListAsync();
             return this._mapper.Map<IEnumerable<CommentDto>>(entities);
         }
-
 
         public async Task<CommentDto> GetByIdAsync(int id)
         {
@@ -55,7 +52,7 @@ namespace TodoListApp.WebApi.Services;
                 return null;
             }
 
-            this._mapper.Map(dto, entity);  // Map updated DTO onto the existing entity
+            this._mapper.Map(dto, entity);
             await this._context.SaveChangesAsync();
             return this._mapper.Map<CommentDto>(entity);
         }

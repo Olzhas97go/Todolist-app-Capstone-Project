@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Interfaces;
@@ -9,21 +8,16 @@ using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Services;
 
-
-
 public class TaskService : ITaskService
 {
     private readonly TodoListDbContext _context;
     private readonly IMapper _mapper;
-    private readonly ILogger<TaskService> _logger;
 
-    public TaskService(TodoListDbContext context, IMapper mapper, ILogger<TaskService> logger)
+    public TaskService(TodoListDbContext context, IMapper mapper)
     {
         this._context = context;
         this._mapper = mapper;
-        this._logger = logger;
     }
-
 
     public async Task<List<TodoTask>> GetTasksForTodoListAsync(int todoListId)
     {
@@ -42,7 +36,7 @@ public class TaskService : ITaskService
 
             return taskModels;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }
@@ -84,7 +78,6 @@ public class TaskService : ITaskService
 
         return this._mapper.Map<TodoTask>(taskEntity);
     }
-
 
     public async Task<bool> DeleteTaskAsync(int taskId)
     {
@@ -165,7 +158,6 @@ public class TaskService : ITaskService
             query = query.Where(t => t.Status == status);
         }
 
-        // Apply sorting
         switch (sortBy.ToLower())
         {
             case "name":

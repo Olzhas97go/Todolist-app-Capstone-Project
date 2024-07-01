@@ -11,7 +11,7 @@ public class BackButtonViewComponent : ViewComponent
 
     public IViewComponentResult Invoke()
     {
-        string source = _httpContextAccessor.HttpContext?.Request?.Query["source"];
+        string source = this._httpContextAccessor.HttpContext?.Request?.Query["source"];
 
         if (!string.IsNullOrEmpty(source) && source.ToLower() == "mytasks")
         {

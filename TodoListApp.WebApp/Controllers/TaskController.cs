@@ -1,10 +1,8 @@
 using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Refit;
 using TodoListApp.WebApi.Interfaces;
@@ -13,7 +11,6 @@ using TodoListApp.WebApi.Models.Models;
 using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Models;
 using TodoListApp.WebApp.Models.TaskModels;
-using AppTask = TodoListApp.WebApp.Models.TaskModels.Task;
 
 namespace TodoListApp.WebApp.Controllers;
 
@@ -55,7 +52,7 @@ public class TaskController : Controller
             var viewModel = new TodoListWithTasksViewModel
             {
                 TodoList = todoList,
-                Tasks = todoListModels
+                Tasks = todoListModels,
             };
 
             return this.View("ViewTasks", viewModel);
@@ -67,10 +64,9 @@ public class TaskController : Controller
                 return this.Redirect("/Identity/Account/Login?ReturnUrl=%2F");
             }
 
-            return this.View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return this.View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
         }
     }
-
 
     [HttpGet("{taskId}")]
     public async Task<IActionResult> Details(int taskId)
@@ -158,11 +154,10 @@ public class TaskController : Controller
         }
     }
 
-
     [HttpPost("{todoListId}/CreateTask")]
     public async Task<IActionResult> CreateTask(int todoListId, CreateTaskViewModel viewModel)
     {
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
             var todoListDto = await this._todoListApi.GetTodoListById(todoListId);
             if (todoListDto != null)
@@ -171,7 +166,7 @@ public class TaskController : Controller
             }
             else
             {
-                this.ModelState.AddModelError("", "An error occurred while fetching the to-do list.");
+                this.ModelState.AddModelError(" ", "An error occurred while fetching the to-do list.");
             }
         }
 
@@ -185,7 +180,6 @@ public class TaskController : Controller
             var newTask = await this._todoListApi.AddTask(todoListId, todoTaskDto);
 
             return this.RedirectToAction("ViewTasks", new { todoListId = viewModel.TodoListId });
-
         }
         catch (Exception ex)
         {
@@ -211,11 +205,11 @@ public class TaskController : Controller
             }
             else
             {
-                _logger.LogError(ex, "An unexpected error occurred while creating the task.");
+                this._logger.LogError(ex, "An unexpected error occurred while creating the task.");
                 throw;
             }
 
-            return this.View(viewModel); // Return the view if there was any error
+            return this.View(viewModel);
         }
     }
 
@@ -231,7 +225,7 @@ public class TaskController : Controller
                 return this.Unauthorized("Unauthorized access.");
             }
 
-            var task = await _todoListApi.GetTaskByIdAsync(taskId);
+            var task = await this._todoListApi.GetTaskByIdAsync(taskId);
             if (task == null)
             {
                 return this.NotFound("Task not found.");
@@ -248,7 +242,7 @@ public class TaskController : Controller
             if (ex.StatusCode == HttpStatusCode.Forbidden)
             {
                 this.TempData["ErrorMessage"] = "You do not have permission to delete this task.";
-                return RedirectToAction("AccessDenied", "Error");
+                return this.RedirectToAction("AccessDenied", "Error");
             }
             else if (ex.StatusCode == HttpStatusCode.NotFound)
             {
@@ -269,14 +263,14 @@ public class TaskController : Controller
     {
         try
         {
-            var taskDto = await _todoListApi.GetTaskByIdAsync(taskId);
+            var taskDto = await this._todoListApi.GetTaskByIdAsync(taskId);
             if (taskDto == null)
             {
                 return this.NotFound("Task not found.");
             }
 
             var taskViewModel = this._mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(taskDto);
-            return View(taskViewModel);
+            return this.View(taskViewModel);
         }
         catch (ApiException ex)
         {
@@ -287,9 +281,9 @@ public class TaskController : Controller
     [HttpPost("{taskId}/edit")]
     public async Task<IActionResult> EditTask([FromQuery] int taskId, TodoListApp.WebApp.Models.TaskModels.Task updatedTask)
     {
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
-            return View(updatedTask);
+            return this.View(updatedTask);
         }
 
         try
@@ -314,11 +308,11 @@ public class TaskController : Controller
             }
             else if (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                return this.NotFound(); // Handle the case where the task or list doesn't exist
+                return this.NotFound();
             }
             else
             {
-                return this.RedirectToAction("Error", "Home"); // Example: redirect to a general error page
+                return this.RedirectToAction("Error", "Home");
             }
         }
     }
@@ -333,20 +327,19 @@ public class TaskController : Controller
             {
                 return this.Unauthorized("Invalid token: Missing User ID claim.");
             }
+
             string userId = userIdClaim.Value;
             IEnumerable<TodoTask> tasks;
 
             if (!string.IsNullOrWhiteSpace(searchString))
             {
-                //var searchedTasks = (await _todoListApi.Search(searchString)).Where(t => t.UserId == userId); // Filter for user's tasks
-                var searchedTasks = await _todoListApi.Search(searchString); // Filter for user's tasks
-                tasks = _mapper.Map<IEnumerable<TodoTask>>(searchedTasks); // Map to TodoTask
+                var searchedTasks = await this._todoListApi.Search(searchString);
+                tasks = this._mapper.Map<IEnumerable<TodoTask>>(searchedTasks);
             }
             else
             {
-                tasks = _mapper.Map<IEnumerable<TodoTask>>(await _todoListApi.GetMyTasks(userId, status, sortBy, sortOrder)); // Map to TodoTask
+                tasks = this._mapper.Map<IEnumerable<TodoTask>>(await this._todoListApi.GetMyTasks(userId, status, sortBy, sortOrder)); // Map to TodoTask
             }
-
 
             var taskListModels = this._mapper.Map<List<TodoListModel>>(tasks);
 
@@ -360,7 +353,7 @@ public class TaskController : Controller
                 SearchString = searchString,
             };
 
-            return View(viewModel);
+            return this.View(viewModel);
         }
         catch (ApiException ex)
         {
@@ -369,7 +362,7 @@ public class TaskController : Controller
                 var validationErrors = await ex.GetContentAsAsync<ValidationProblemDetails>();
                 foreach (var error in validationErrors.Errors)
                 {
-                    ModelState.AddModelError(error.Key, error.Value.First());
+                    this.ModelState.AddModelError(error.Key, error.Value.First());
                 }
 
                 return this.View("MyTasks");
@@ -378,7 +371,6 @@ public class TaskController : Controller
             return this.StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
-
 
     public async Task<IActionResult> Search(string searchString)
     {
@@ -412,7 +404,6 @@ public class TaskController : Controller
             return this.StatusCode((int)ex.StatusCode, "API Error: " + ex.Message);
         }
     }
-
 
     [HttpPost("{todoListId}/{taskId}/change-status")]
     public async Task<IActionResult> ChangeTaskStatus(int todoListId, int taskId, ToDoTaskStatus newStatus)

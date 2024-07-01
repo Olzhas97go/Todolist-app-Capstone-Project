@@ -50,7 +50,6 @@ public interface ITodoListApi
     [Get("/api/tags/task/{taskId}")]
     Task<IEnumerable<TagDto>> GetTagsForTaskAsync(int taskId);
 
-
     [Get("/api/tags/tasks/{tagText}")]
     Task<ApiResponse<IEnumerable<TodoTaskDto>>> GetTasksByTagAsync(string tagText);
 

@@ -7,21 +7,20 @@ using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Controllers;
+
 [ApiController]
 [Route("api/tags")]
 public class TagController : ControllerBase
 {
     private readonly ITagService _service;
-    private readonly ILogger<TodoListController> _logger;
     private readonly IMapper _mapper;
     private readonly TodoListDbContext _context;
 
-    public TagController(ITagService service, ILogger<TodoListController> logger, TodoListDbContext context, IMapper mapper)
+    public TagController(ITagService service, TodoListDbContext context, IMapper mapper)
     {
         this._mapper = mapper;
         this._context = context;
         this._service = service;
-        this._logger = logger;
     }
 
     [HttpGet("all")]
@@ -37,7 +36,6 @@ public class TagController : ControllerBase
         var result = await this._service.GetTasksByTagAsync(tagText);
         return this.Ok(result);
     }
-
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TagDto>> GetById(int id)
@@ -60,7 +58,7 @@ public class TagController : ControllerBase
         }
 
         // Check if the task exists
-        if (!await _context.Tasks.AnyAsync(t => t.Id == dto.TaskId))
+        if (!await this._context.Tasks.AnyAsync(t => t.Id == dto.TaskId))
         {
             return this.BadRequest("Invalid TaskId. The task does not exist.");
         }
@@ -94,9 +92,9 @@ public class TagController : ControllerBase
         try
         {
             var tagDtos = await this._context.Tags.Where(t => t.TaskId == taskId).ToListAsync();
-            return this.Ok(this._mapper.Map<IEnumerable<TagDto>>(tagDtos)); // Map to DTOs (if needed)
+            return this.Ok(this._mapper.Map<IEnumerable<TagDto>>(tagDtos));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return this.StatusCode(500, "Internal server error");
         }

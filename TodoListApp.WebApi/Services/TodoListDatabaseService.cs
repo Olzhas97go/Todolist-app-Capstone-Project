@@ -7,18 +7,15 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
-using TodoListApp.WebApi.Models;
 
 public class TodoListDatabaseService : ITodoListDatabaseService
 {
     private readonly TodoListDbContext _context;
-    private readonly ILogger<TodoListDatabaseService> _logger;
     private readonly IMapper _mapper;
 
-    public TodoListDatabaseService(TodoListDbContext context, ILogger<TodoListDatabaseService> logger, IMapper mapper)
+    public TodoListDatabaseService(TodoListDbContext context, IMapper mapper)
     {
         this._context = context;
-        this._logger = logger;
         this._mapper = mapper;
     }
 
@@ -31,7 +28,7 @@ public class TodoListDatabaseService : ITodoListDatabaseService
     {
         try
         {
-            var entities = await this._context.TodoLists.ToListAsync(); // Query the DbSet
+            var entities = await this._context.TodoLists.ToListAsync();
             return this._mapper.Map<List<TodoListModel>>(entities);
         }
         catch (Exception ex)
@@ -49,14 +46,14 @@ public class TodoListDatabaseService : ITodoListDatabaseService
                 throw new ArgumentException("Todo list name cannot be empty.");
             }
 
-            var todoListEntity = _mapper.Map<TodoListEntity>(newTodoListDto);
+            var todoListEntity = this._mapper.Map<TodoListEntity>(newTodoListDto);
 
             todoListEntity.Id = 0;
 
-            _context.TodoLists.Add(todoListEntity);
-            await _context.SaveChangesAsync();
+            this._context.TodoLists.Add(todoListEntity);
+            await this._context.SaveChangesAsync();
 
-            return _mapper.Map<TodoListDto>(todoListEntity);
+            return this._mapper.Map<TodoListDto>(todoListEntity);
         }
         catch (ArgumentException ex)
         {
@@ -99,10 +96,9 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         existingTodoList.Name = todoList.Name;
         existingTodoList.Description = todoList.Description;
 
-
         try
         {
-            await _context.SaveChangesAsync();
+            await this._context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -115,7 +111,7 @@ public class TodoListDatabaseService : ITodoListDatabaseService
 
     public async Task<TodoListEntity> GetTodoListByIdAsync(int id)
     {
-        var todoListEntity = await _context.TodoLists
+        var todoListEntity = await this._context.TodoLists
             .Include(tl => tl.Tasks)
             .FirstOrDefaultAsync(tl => tl.Id == id);
 
@@ -123,6 +119,7 @@ public class TodoListDatabaseService : ITodoListDatabaseService
         {
             return null;
         }
+
         return todoListEntity;
     }
 }

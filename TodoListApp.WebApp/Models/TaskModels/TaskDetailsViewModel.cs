@@ -8,7 +8,7 @@ public class TaskDetailsViewModel
 {
     public TodoListDto TodoList { get; set; }
 
-    public TodoTask  SelectedTodoTask { get; set; }
+    public TodoTask SelectedTodoTask { get; set; }
 
     public TodoTask SelectedTask { get; set; }
 

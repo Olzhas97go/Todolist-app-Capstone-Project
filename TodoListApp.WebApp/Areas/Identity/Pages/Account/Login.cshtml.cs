@@ -35,10 +35,10 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
             IConfiguration configuration,
             UserManager<ApplicationUser> userManager)
         {
-            _signInManager = signInManager;
-            _logger = logger;
-            _configuration = configuration;
-            _userManager = userManager;
+            this._signInManager = signInManager;
+            this._logger = logger;
+            this._configuration = configuration;
+            this._userManager = userManager;
         }
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
@@ -54,13 +54,13 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
             {
                 claims.Add(new Claim(ClaimTypes.Role, userRole));
             }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:TokenSigningKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._configuration["Jwt:TokenSigningKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddDays(7);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims), Expires = expires, SigningCredentials = creds
+                Subject = new ClaimsIdentity(claims), Expires = expires, SigningCredentials = creds,
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -164,8 +164,7 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
                     var user = await _userManager.FindByEmailAsync(Input.Email);
                     var jwtToken = await GenerateJwtToken(user);
 
-                    Response.Cookies.Append("jwtToken", jwtToken,
-                        new CookieOptions
+                    Response.Cookies.Append("jwtToken", jwtToken, new CookieOptions
                         {
                             HttpOnly = true,
                             Secure = true,
@@ -173,7 +172,7 @@ namespace TodoListApp.WebApp.Areas.Identity.Pages.Account
                             Expires = DateTime.UtcNow.AddDays(7),
                         });
 
-                    return LocalRedirect(returnUrl);
+                    return this.LocalRedirect(returnUrl);
                 }
 
                 if (result.RequiresTwoFactor)

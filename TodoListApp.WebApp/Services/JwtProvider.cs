@@ -15,7 +15,7 @@ public class JwtProvider : IJwtTokenGenerator
     public JwtProvider(
         IConfiguration config)
     {
-        _config = config;
+        this._config = config;
     }
 
     public async Task<string> GenerateToken(ClaimsPrincipal user)
@@ -25,6 +25,7 @@ public class JwtProvider : IJwtTokenGenerator
         {
             throw new InvalidOperationException("User does not have an email.");
         }
+
         var email = emailClaim.Value;
 
         var nameIdentifierClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -32,6 +33,7 @@ public class JwtProvider : IJwtTokenGenerator
         {
             throw new InvalidOperationException("User does not have an Id.");
         }
+
         var userId = nameIdentifierClaim.Value;
 
         var claims = new List<Claim>
@@ -41,7 +43,7 @@ public class JwtProvider : IJwtTokenGenerator
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_config["Jwt:TokenSigningKey"]);
+        var key = Encoding.ASCII.GetBytes(this._config["Jwt:TokenSigningKey"]);
         var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
         var expires = DateTime.UtcNow.AddDays(7);
 

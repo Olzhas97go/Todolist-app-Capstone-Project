@@ -6,17 +6,16 @@ using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Services;
+
 public class TagService : ITagService
 {
     private readonly TodoListDbContext _context;
-    private readonly ILogger<TaskService> _logger;
     private readonly IMapper _mapper;
 
-    public TagService(TodoListDbContext context, ILogger<TaskService> logger, IMapper mapper)
+    public TagService(TodoListDbContext context, IMapper mapper)
     {
         this._mapper = mapper;
         this._context = context;
-        this._logger = logger;
     }
 
     public async Task<IEnumerable<TagDto>> GetAllAsync()
@@ -33,11 +32,9 @@ public class TagService : ITagService
         return this._mapper.Map<List<TodoTaskDto>>(entities);
     }
 
-
-
     public async Task<TagDto> GetByIdAsync(int id)
     {
-        var entity = await _context.Tags.FirstOrDefaultAsync(t => t.Id == id);
+        var entity = await this._context.Tags.FirstOrDefaultAsync(t => t.Id == id);
         if (entity == null)
         {
             return null;
@@ -62,9 +59,9 @@ public class TagService : ITagService
             return null;
         }
 
-        this._mapper.Map(dto, entity);  // Map updated DTO onto the entity
+        this._mapper.Map(dto, entity);
         await this._context.SaveChangesAsync();
-        return this._mapper.Map<TagDto>(entity); // Map back to DTO after saving
+        return this._mapper.Map<TagDto>(entity);
     }
 
     public async Task DeleteAsync(int id)

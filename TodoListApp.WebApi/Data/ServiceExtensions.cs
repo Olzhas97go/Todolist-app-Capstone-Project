@@ -1,15 +1,9 @@
-﻿using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using AutoMapper;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
-using TodoListApp.WebApi.Controllers;
-using TodoListApp.WebApi.Data;
 using TodoListApp.WebApi.Interfaces;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Profiles;
@@ -55,7 +49,7 @@ public static class ServiceExtensions
                     },
                 };
             });
-        services.AddAuthorization(options => // Add this section
+        services.AddAuthorization(options =>
         {
             options.AddPolicy("OwnerPolicy", policy => policy.RequireRole(UserRoles.Owner.ToString()));
             options.AddPolicy("EditorPolicy", policy => policy.RequireRole(UserRoles.Editor.ToString()));

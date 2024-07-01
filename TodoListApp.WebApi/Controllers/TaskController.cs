@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,24 +11,20 @@ using TodoListApp.WebApi.Models.Models;
 
 namespace TodoListApp.WebApi.Controllers;
 
-
 [ApiController]
 [Route("api/task")]
 public class TaskController : ControllerBase
 {
     private readonly ITaskService _taskService;
-    private readonly ILogger<TaskController> _logger;
     private readonly IMapper _mapper;
     private readonly TodoListDbContext _context;
 
-    public TaskController(ITaskService taskService, ILogger<TaskController> logger, IMapper mapper, TodoListDbContext context)
+    public TaskController(ITaskService taskService, IMapper mapper, TodoListDbContext context)
     {
         this._taskService = taskService;
-        this._logger = logger;
         this._mapper = mapper;
         this._context = context;
     }
-
 
     [HttpGet("{todoListId}/tasks")]
     [Authorize(Roles = "Owner,Editor,Viewer")]
@@ -39,7 +34,7 @@ public class TaskController : ControllerBase
         return this.Ok(tasks);
     }
 
-    [HttpPost("{todoListId}/tasks")] // POST /api/tasks/{todoListId}/tasks
+    [HttpPost("{todoListId}/tasks")]
     [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult<TodoTask>> AddTask(int todoListId, [FromBody] TodoTask newTodoTask)
     {
@@ -62,15 +57,15 @@ public class TaskController : ControllerBase
                 Description = newTodoTask.Description,
                 TodoListId = todoListId,
                 CreatedDate = DateTime.Now,
-                Status = ToDoTaskStatus.NotStarted, // Assuming you have an enum for task status
-                UserId = userIdClaim.Value // Set the UserId on the entity
+                Status = ToDoTaskStatus.NotStarted,
+                UserId = userIdClaim.Value,
             };
 
-            var createdTask = await this._taskService.AddTaskAsync(taskEntity); // Pass the entity to your service
+            var createdTask = await this._taskService.AddTaskAsync(taskEntity);
 
             if (createdTask == null)
             {
-                return this.NotFound(); // Or BadRequest if you want to signal an error
+                return this.NotFound();
             }
             else
             {
@@ -79,10 +74,9 @@ public class TaskController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
-
 
     [HttpGet("{taskId}")]
     [Authorize(Roles = "Owner,Editor,Viewer")]
@@ -99,9 +93,9 @@ public class TaskController : ControllerBase
             var taskDto = this._mapper.Map<TodoTaskDto>(task);
             taskDto.IsOverdue = task.IsOverdue;
 
-            if (User != null)
+            if (this.User != null)
             {
-                var userTimeZoneId = User.FindFirstValue("TimeZone") ?? "UTC";
+                var userTimeZoneId = this.User.FindFirstValue("TimeZone") ?? "UTC";
                 var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
 
                 try
@@ -118,15 +112,13 @@ public class TaskController : ControllerBase
 
             return this.Ok(taskDto);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return StatusCode(500, "Internal server error");
+            return this.StatusCode(500, "Internal server error");
         }
     }
 
-
-    // TaskController.cs
-    [HttpPut("{taskId}")] // PUT /api/tasks/{taskId}
+    [HttpPut("{taskId}")]
     [Authorize(Roles = "Owner,Editor")]
     public async Task<ActionResult<TodoTaskDto>> UpdateTask(int taskId, [FromBody] TodoTask updatedTodoTask)
     {
@@ -137,7 +129,7 @@ public class TaskController : ControllerBase
 
         try
         {
-            var updated = await _taskService.UpdateTaskAsync(taskId, updatedTodoTask);
+            var updated = await this._taskService.UpdateTaskAsync(taskId, updatedTodoTask);
             if (updated == null)
             {
                 return this.NotFound();
@@ -169,32 +161,30 @@ public class TaskController : ControllerBase
 
             return this.NoContent(); // Return 204 No Content on successful deletion
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return this.StatusCode(500, "Internal server error");
         }
     }
 
-    // In your Web API TaskController
     [HttpPut("{taskId}/status")]
     [Authorize(Roles = "Owner,Editor")]
     public async Task<IActionResult> UpdateTaskStatus(int taskId, [FromBody] UpdateTaskStatusRequest request)
     {
-        // Validate the request
         if (!this.ModelState.IsValid)
         {
             return this.BadRequest(this.ModelState);
         }
+
         try
         {
-            // Update the task status using your _taskService
             var updatedTask = await this._taskService.UpdateTaskStatusAsync(request.TodoListId, taskId, request.NewStatus);
             if (updatedTask == null)
             {
                 return this.NotFound();
             }
 
-            var updatedTaskDto = _mapper.Map<TodoTaskDto>(updatedTask);
+            var updatedTaskDto = this._mapper.Map<TodoTaskDto>(updatedTask);
             return this.Ok(updatedTaskDto);
         }
         catch (Exception ex)
@@ -203,19 +193,17 @@ public class TaskController : ControllerBase
         }
     }
 
-
-
     [HttpGet("GetMyTasks")]
     [Authorize]
     public IActionResult GetMyTasks([FromQuery] ToDoTaskStatus? status = null, [FromQuery] string sortBy = "Name", [FromQuery] string sortOrder = "asc")
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        var userIdClaim = this.User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
         {
             return this.Unauthorized("Invalid token: Missing User ID claim.");
         }
 
-        var userId = userIdClaim.Value; // Remove the duplicate declaration of 'string userId'
+        var userId = userIdClaim.Value;
 
         var tasks = this._context.Tasks.Where(t => t.UserId == userId).ToList();
 
@@ -234,12 +222,12 @@ public class TaskController : ControllerBase
                 tasks = sortOrder == "desc" ? tasks.OrderByDescending(t => t.DueDate).ToList() : tasks.OrderBy(t => t.DueDate).ToList();
                 break;
             default:
-                // Default sorting (by Name ascending)
                 tasks = tasks.OrderBy(t => t.Title).ToList();
                 break;
         }
+
         var taskDtos = this._mapper.Map<List<TodoTaskDto>>(tasks);
-        return Ok(taskDtos);
+        return this.Ok(taskDtos);
     }
 
     [HttpGet("search")]

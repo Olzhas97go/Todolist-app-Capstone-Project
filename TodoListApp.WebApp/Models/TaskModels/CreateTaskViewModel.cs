@@ -12,7 +12,6 @@ namespace TodoListApp.WebApp.Models.TaskModels
 
         public string TodoListName { get; set; }
 
-
         [Required]
         [StringLength(100, ErrorMessage = "Title cannot exceed 100 characters.")]
         public string Title { get; set; } = string.Empty;
@@ -30,7 +29,6 @@ namespace TodoListApp.WebApp.Models.TaskModels
         public string UserId { get; set; } = string.Empty; // Change the type to string
 
         public List<TagDto> Tags { get; set; } = new List<TagDto>();
-
     }
 }
 

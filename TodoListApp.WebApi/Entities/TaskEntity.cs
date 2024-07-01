@@ -20,8 +20,8 @@ public class TaskEntity
 
     public DateTime? DueDate { get; set; } = DateTime.UtcNow;
 
-    [NotMapped] // Don't store in database
-    public bool IsOverdue => DueDate.HasValue && DueDate < DateTime.Now;
+    [NotMapped]
+    public bool IsOverdue => this.DueDate.HasValue && this.DueDate < DateTime.Now;
 
     public bool IsCompleted { get; set; }
 

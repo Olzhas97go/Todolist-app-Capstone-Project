@@ -18,5 +18,5 @@ public class TodoListWithTasksViewModel
 
     public string SortOrder { get; set; } = "asc";
 
-    public string SearchString { get; set; } = "";
+    public string SearchString { get; set; } = " ";
 }

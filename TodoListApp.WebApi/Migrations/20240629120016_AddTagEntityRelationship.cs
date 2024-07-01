@@ -13,7 +13,6 @@ namespace TodoListApp.WebApi.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
         }
     }
 }

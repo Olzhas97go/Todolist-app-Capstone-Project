@@ -1,16 +1,11 @@
 ﻿using AutoMapper;
-using Automation;
 using TodoListApp.WebApi.Entities;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Models.Models;
-using TodoListApp.WebApi.Profiles;
-using TodoListApp.WebApp.Models;
 using TodoListApp.WebApp.Models.TaskModels;
 using Task = TodoListApp.WebApp.Models.TaskModels.Task;
 
-namespace TodoListApp.WebApi.Services;
-
-
+namespace TodoListApp.WebApp.Models;
 
 public class MappingProfile : Profile
 {
@@ -30,7 +25,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
             .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
 
         this.CreateMap<Task, TodoTaskDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
@@ -64,8 +58,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src => src.IsCompleted))
             .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.DueDate < DateTime.Now))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (ToDoTaskStatus)src.Status)); // Cast to enum
-
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (ToDoTaskStatus)src.Status));
 
         this.CreateMap<TaskEntity, Task>()
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))

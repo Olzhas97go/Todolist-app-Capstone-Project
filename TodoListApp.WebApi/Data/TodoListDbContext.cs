@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Entities;
-using TodoListApp.WebApi.Models;
 
 namespace TodoListApp.WebApi.Data;
 
@@ -45,12 +42,12 @@ public class TodoListDbContext : DbContext
 
         modelBuilder.Entity<CommentEntity>(entity =>
         {
-            entity.HasKey(c => c.Id); // Set the primary key
-            entity.Property(c => c.Text).IsRequired(); // Text is required
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Text).IsRequired();
             entity.Property(c => c.CreatedDate).IsRequired();
 
             entity.HasOne(c => c.Task)
-                .WithMany(t => t.Comments) // TaskEntity should have a Comments collection
+                .WithMany(t => t.Comments)
                 .HasForeignKey(c => c.TaskId);
         });
 

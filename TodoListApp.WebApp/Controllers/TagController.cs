@@ -8,16 +8,16 @@ using TodoListApp.WebApp.Interfaces;
 using TodoListApp.WebApp.Models.TaskModels;
 
 namespace TodoListApp.WebApp.Controllers;
+
 public class TagController : Controller
 {
     private readonly ITodoListApi _todoListApi;
     private readonly IMapper _mapper;
 
-
     public TagController(ITodoListApi todoListApi, IMapper mapper)
     {
-        _mapper = mapper;
-        _todoListApi = todoListApi;
+        this._mapper = mapper;
+        this._todoListApi = todoListApi;
     }
 
     public async Task<IActionResult> TasksByTag(string tagText)
@@ -45,7 +45,7 @@ public class TagController : Controller
     [HttpPost]
     public async Task<IActionResult> AddTag(TagCreateViewModel model)
     {
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
             var task = await this._todoListApi.GetTaskByIdAsync(model.TaskId);
             var taskModel = this._mapper.Map<TodoListApp.WebApp.Models.TaskModels.Task>(task);

@@ -53,7 +53,7 @@ public class ApiHeaderService : IApiHeaderService
             context.Response.Headers["WWW-Authenticate"] = "Bearer error=\"invalid_token\", error_description=\"The token has an invalid signature\"";
             return;
         }
-        catch (SecurityTokenException ex)
+        catch (SecurityTokenException)
         {
             context.Response.StatusCode = 401;
             context.Response.Headers["WWW-Authenticate"] = "Bearer error=\"invalid_token\", error_description=\"The token is invalid\"";
@@ -71,6 +71,7 @@ public class ApiHeaderService : IApiHeaderService
         {
             throw new InvalidOperationException("JWT configuration values (TokenSigningKey, ValidIssuer, or ValidAudience) are missing or invalid.");
         }
+
         return new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -80,7 +81,7 @@ public class ApiHeaderService : IApiHeaderService
             ValidIssuer = validIssuer,
             ValidAudience = validAudience,
             RoleClaimType = ClaimTypes.Role,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Keys:TokenSigningKey"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._configuration["Keys:TokenSigningKey"])),
         };
     }
 }

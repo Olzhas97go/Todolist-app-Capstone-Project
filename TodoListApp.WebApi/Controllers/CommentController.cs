@@ -19,7 +19,7 @@ public class CommentController : ControllerBase
     public async Task<ActionResult<IEnumerable<CommentDto>>> GetAll()
     {
         var result = await this._service.GetAllAsync();
-        return Ok(result);
+        return this.Ok(result);
     }
 
     [HttpGet("{id}")]
@@ -38,7 +38,7 @@ public class CommentController : ControllerBase
     public async Task<ActionResult<CommentDto>> Create(CommentDto dto)
     {
         var result = await this._service.CreateAsync(dto);
-        return CreatedAtAction(nameof(this.GetById), new { id = result.Id }, result);
+        return this.CreatedAtAction(nameof(this.GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]
