@@ -63,7 +63,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<IRoleAssignmentService, DatabaseRoleAssignmentService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddScoped<IJwtTokenGenerator, JwtProvider>();
 builder.Services.AddScoped<IApiHeaderService, ApiHeaderService>();

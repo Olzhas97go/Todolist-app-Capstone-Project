@@ -156,4 +156,13 @@ body {
 }
 .card-custom .card-header h2 {
     color: #007bff; /* Change this to the desired color */
+}/* In your CSS file or <style> tag */
+.form-floating > .form-select {
+    padding-top: 1.625rem; /* Adjust as needed to match your label height */
+    padding-bottom: 0.625rem; /* Adjust as needed */
+}
+
+.form-floating > label {
+    padding: 0.625rem 0.75rem; /* Adjust as needed */
+    font-size: 0.875rem; /* Adjust for better readability */
 }
